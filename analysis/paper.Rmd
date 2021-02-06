@@ -17,8 +17,52 @@ output: distill::distill_article
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+```{r dependencies, include=FALSE}
+library("tidyverse")
+library("openarchaeoCollaboration")
+```
 
+## Materials and methods
 
+We used *open-archaeo* <https://open-archaeo.info/>, a list of open source archaeological software and other digital resources.
+The criteria for inclusion in open-archaeo are [...].
+The search strategy for compiling it was [...].
 
+```{r data-oarch}
+oarch <- read_csv("https://raw.githubusercontent.com/zackbatist/open-archaeo/master/open-archaeo.csv")
+```
 
+We augmented this with data from the GitHub API for records with an associated GitHub repository.
 
+```{r data-github}
+oarch %>% 
+  mutate(
+    gh_repo = str_remove(github, "https://github.com/"),
+    gh_repo = str_remove(gh_repo, "/$")
+  ) %>% 
+  separate(gh_repo, c("gh_owner", "gh_repo"), "/", extra = "drop") %>% 
+  mutate(
+    gh_lang = ght("GET /repos/{owner}/{repo}/languages", 
+                  owner = gh_owner, repo = gh_repo)
+  ) ->
+  oarch
+```
+
+## Results
+
+What languages are people using?
+
+```{r plot-gh_lang}
+oarch$gh_lang %>% 
+  pivot_longer(everything(), names_to = "language", values_to = "n") %>% 
+  drop_na(n) %>% 
+  group_by(language) %>% 
+  summarise(n = sum(n), .groups = "drop") %>% 
+  arrange(-n) %>% 
+  slice(1:10) %>% 
+  ggplot(aes(fct_reorder(language, n, .desc = TRUE), n)) +
+  geom_col() +
+  labs(title = "Languages used in GitHub repositories",
+       caption = "Data: <https://open-archaeo.info> and the GitHub API",
+       x = "Language", y = "Bytes of code")
+```
