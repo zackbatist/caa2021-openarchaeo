@@ -1,0 +1,24 @@
+---
+title: "openarchaeoCollaboration"
+description: |
+  Insert abstract here.
+author:
+  - name: Zack Batist
+    url: https://zackbatist.github.io
+    affiliation: University of Toronto
+  - name: Joe Roe
+    url: https://joeroe.io
+    affiliation: University of Copenhagen
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+
+
+
+
