@@ -1,0 +1,19 @@
+Package: openarchaeoCollaboration
+Type: Package
+Title: Data and Code for ...
+Version: 0.1.0
+Authors@R: 
+  c(person(given = "Batist",
+           family = "Zack",
+           role = c("aut", "cre"),
+           email = "",
+           comment = c(ORCID = "0000-0003-0435-508X")),
+    person(given = "Roe",
+           family = "Joe",
+           role = "aut",
+           email = "joe@joeroe.io",
+           comment = c(ORCID = "0000-0002-1011-1244")))
+Description: Research compendium containing data and code for ...
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true

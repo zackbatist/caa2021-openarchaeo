@@ -1,1 +1,3 @@
-# caa2021-openarchaeo
+# openarchaeoCollaboration
+
+Research compendium containing data and code for ...
