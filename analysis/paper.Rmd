@@ -22,6 +22,9 @@ library("tidyverse")
 library("openarchaeoCollaboration")
 ```
 
+## Abstract
+Computational tools and practices are increasingly recognized as valuable and commonplace components of the general archaeological toolbox. Aside from writing one-off scripts used to process and analyze data pertaining to specific research programs, archaeologists have also been developing software designed for general use. This paper surveys the field of archaeological software development in order to understand what kinds of software archaeologists are making, and to identify norms regarding how software is built and maintained. Specifically, we focus our inquiry on collaborative aspects of software development, and how archaeologists make use of tools and platforms designed to facilitate collaboration among professional software developers. Our formal analysis of specific engagements with software development projects hosted on GitHub finds that [...]
+
 ## Materials and methods
 
 We used *open-archaeo* <https://open-archaeo.info/>, a list of open source archaeological software and other digital resources.
