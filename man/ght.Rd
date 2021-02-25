@@ -2,7 +2,7 @@
 % Please edit documentation in R/gh.R
 \name{ght}
 \alias{ght}
-\title{Query the GitHub API and return a table}
+\title{Query the GitHub API (tabulated)}
 \usage{
 ght(endpoint, ...)
 }
@@ -13,19 +13,20 @@ ght(endpoint, ...)
 API parameters in \code{endpoint}.}
 }
 \value{
-A data frame with one row per query, and one column per response vector.
+If each response returns a single row, a \code{tibble} with one row per query
+(producing a packed column if used in \code{mutate()}). Otherwise, a list of
+\code{tibbles} for each query (producing a nested column if used in \code{mutate()}).
 }
 \description{
-Vectorised wrapper for \code{\link[gh:gh]{gh::gh()}} that:
-\itemize{
-\item Converts the response to a data frame
-\item Silently skips queries where any value of \code{...} is \code{NA}, returning an \code{NA}
-row.
-\item Catches API error statuses (e.g. 404), returning an \code{NA} row and a printed
-message instead of an error.
+\code{\link[dplyr:mutate]{dplyr::mutate()}}-friendly wrapper for \code{\link[gh:gh]{gh::gh()}} that tabulates the response
+and always returns a vector that matches the number of queries.
+Vectorised over the named API parameters in \code{...}.
 }
+\details{
+Empty responses return an \code{NA} row, with a warning if the request produced
+a 404 error. Queries where any value of \code{...} is \code{NA} will also return an
+\code{NA} row.
 }
 \examples{
-ght("GET /repos/{owner}/{repo}/languages",
-    owner = c("joeroe", "joeroe"), repo = c("era", "c14"))
+ght("GET /repos/{owner}/{repo}/languages", owner = c("joeroe", "joeroe"), repo = c("era", "c14"))
 }
