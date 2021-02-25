@@ -14,7 +14,6 @@ Some patterns to examine:
 - How is support being requested and/or provided?
   - Proviso that GH issues aren't really intended for support questions
 - How is code being reused, forked or referenced?
-- ...
 
 ## Sampling
 - Currently 210 out of 270 records have a github repo

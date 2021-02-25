@@ -35,22 +35,26 @@ oarch <- read_csv("https://raw.githubusercontent.com/zackbatist/open-archaeo/mas
 We augmented this with data from the GitHub API for records with an associated GitHub repository.
 
 ```{r data-github}
+# Pretty slow
 oarch %>% 
   mutate(
     gh_repo = str_remove(github, "https://github.com/"),
     gh_repo = str_remove(gh_repo, "/$")
   ) %>% 
-  separate(gh_repo, c("gh_owner", "gh_repo"), "/", extra = "drop") %>% 
+  separate(gh_repo, c("gh_owner", "gh_repo"), "/", 
+           fill = "right", extra = "drop") %>% 
   mutate(
     gh_lang = ght("GET /repos/{owner}/{repo}/languages", 
-                  owner = gh_owner, repo = gh_repo)
+                  owner = gh_owner, repo = gh_repo),
+    gh_contributors = ght("GET /repos/{owner}/{repo}/contributors",
+                          owner = gh_owner, repo = gh_repo)
   ) ->
   oarch
 ```
 
 ## Results
 
-What languages are people using?
+### What languages are people using?
 
 ```{r plot-gh_lang}
 oarch$gh_lang %>% 
@@ -65,4 +69,22 @@ oarch$gh_lang %>%
   labs(title = "Languages used in GitHub repositories",
        caption = "Data: <https://open-archaeo.info> and the GitHub API",
        x = "Language", y = "Bytes of code")
+```
+
+### Who is contributing?
+
+```{r plot-gh_contributors-by-repo}
+oarch %>% 
+  unnest(gh_contributors) %>% 
+  mutate(gh_repo = paste(gh_owner, gh_repo, sep = "/")) %>% 
+  group_by(gh_repo) %>% 
+  summarise(n = n(), .groups = "drop") %>% 
+  ggplot(aes(fct_reorder(gh_repo, n, .desc = TRUE), n)) +
+  geom_col() +
+  labs(
+    title = "Repositories by number of contributors",
+    caption = "Data: <https://open-archaeo.info> and the GitHub API",
+    x = "Repository", y = "Number of contributors"
+  ) +
+  theme(axis.text.x = element_blank())
 ```
