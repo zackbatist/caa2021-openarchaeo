@@ -24,3 +24,8 @@ Depends:
     glue
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Imports: 
+    vctrs,
+    dplyr,
+    rlang,
+    lubridate
