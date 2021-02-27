@@ -14,11 +14,13 @@ output: distill::distill_article
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      layout = "l-body-outset")
 ```
 
 ```{r dependencies, include=FALSE}
 library("tidyverse")
+library("lubridate")
 library("openarchaeoCollaboration")
 ```
 
@@ -36,6 +38,28 @@ read_csv("https://raw.githubusercontent.com/zackbatist/open-archaeo/master/open-
   mutate(category = na_if(category, "?")) %>% 
   mutate(gh_repo = str_remove(github, "https://github.com/")) ->
   oarch
+
+oarch <- mutate(oarch, rough_category = recode(category,
+                                 "R" = "Packages (R, Python, etc.)",
+                                 "Web apps" = "Standalone apps",
+                                 "Datasets" = "Analyses & datasets",
+                                 "Tutorials" = "Lists & tutorials",
+                                 "Python" = "Packages (R, Python, etc.)",
+                                 "Desktop apps" = "Standalone apps",
+                                 "QGIS" = "Plugins",
+                                 "Lists" = "Lists & tutorials",
+                                 "Mobile apps" = "Standalone apps",
+                                 "Analyses" = "Analyses & datasets",
+                                 "Spreadsheets" = "Forms & spreadsheets",
+                                 "Command line tools" = "Standalone apps",
+                                 "Plugins" = "Plugins",
+                                 "ArcGis" = "Plugins",
+                                 "Filemaker" = "Plugins",
+                                 "ODK" = "Forms & spreadsheets",
+                                 "Lisp" = "Packages (R, Python, etc.)",
+                                 .default = "Other",
+                                 .missing = "Other"
+                                 ))
 ```
 
 We augmented this with data from the GitHub API for records with an associated GitHub repository.
@@ -89,6 +113,36 @@ oarch %>%
 ```
 
 ### Use of GitHub
+
+```{r plot-gh_commits-cum}
+oarch %>% 
+  unnest(gh_commits) %>% 
+  drop_na(sha) %>% 
+  mutate(date = floor_date(datetime, "week")) %>% 
+  mutate(rough_category = recode(
+    rough_category,
+    "Standalone apps" = "Standalone apps",
+    "Packages (R, Python, etc.)" = "Packages (R, Python, etc.)",
+    .default = "Other")) %>% 
+  group_by(rough_category, date) %>% 
+  summarise(n_commits = n(), .groups = "drop_last") %>% 
+  mutate(cat_total = sum(n_commits)) %>% 
+  mutate(cum_commits = cumsum(n_commits)) %>% 
+  ggplot(aes(date, cum_commits, 
+             fill = fct_reorder(rough_category, cat_total))) +
+  geom_area() +
+  scale_x_datetime(limits = c(ymd("2008-01-01", tz = "UTC"), NA),
+                   date_breaks = "2 years",
+                   date_labels = "%Y") +
+  scale_fill_discrete(guide = guide_legend(reverse = TRUE)) +
+  labs(
+    title = "Open source archaeology",
+    subtitle = "Cumulative commits in GitHub repositories",
+    caption = "Data: <https://open-archaeo.info> and the GitHub API",
+    x = NULL, y = "Commits", fill = NULL
+  ) +
+  theme(legend.position = "bottom")
+```
 
 ```{r plot-gh_langs, fig.show="hold", out.width="50%"}
 oarch %>% 
