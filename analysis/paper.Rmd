@@ -43,11 +43,13 @@ We augmented this with data from the GitHub API for records with an associated G
 ```{r data-github}
 # Warning: slow
 # TODO: map
-gh_langs <- map(oarch$gh_repo, gh_lang)
-gh_contribs <- map(oarch$gh_repo, gh_contrib)
-gh_issues <- map(oarch$gh_repo, gh_issue)
-gh_comments <- map(oarch$gh_repo, gh_comment)
-gh_commits <- map(oarch$gh_repo, function(x) { print(x); gh_commit(x) })
+oarch <- mutate(oarch,
+                gh_langs = map(oarch$gh_repo, gh_lang),
+                gh_contribs = map(oarch$gh_repo, gh_contrib),
+                gh_issues = map(oarch$gh_repo, gh_issue),
+                gh_comments = map(oarch$gh_repo, gh_comment),
+                gh_commits = map(oarch$gh_repo, gh_commit),
+)
 ```
 
 ## Results
