@@ -90,19 +90,34 @@ oarch %>%
 
 ### Use of GitHub
 
-```{r plot-gh_lang}
-oarch$gh_lang %>% 
-  pivot_longer(everything(), names_to = "language", values_to = "n") %>% 
-  drop_na(n) %>% 
-  group_by(language) %>% 
-  summarise(n = sum(n), .groups = "drop") %>% 
+```{r plot-gh_langs, fig.show="hold", out.width="50%"}
+oarch %>% 
+  unnest(gh_langs) %>% 
+  drop_na(lang, bytes) %>% 
+  group_by(lang) %>% 
+  summarise(n = n(), .groups = "drop") %>% 
   arrange(-n) %>% 
   slice(1:10) %>% 
-  ggplot(aes(fct_reorder(language, n, .desc = TRUE), n)) +
+  ggplot(aes(fct_reorder(lang, n, .desc = TRUE), n)) +
   geom_col() +
   labs(title = "Languages used in GitHub repositories",
+       subtitle = "Number of repositories using top 10 languages",
        caption = "Data: <https://open-archaeo.info> and the GitHub API",
-       x = "Language", y = "Bytes of code")
+       x = NULL, y = "Number of repositories")
+
+oarch %>% 
+  unnest(gh_langs) %>% 
+  drop_na(lang, bytes) %>% 
+  group_by(lang) %>% 
+  summarise(bytes = sum(bytes), .groups = "drop") %>% 
+  arrange(-bytes) %>% 
+  slice(1:10) %>% 
+  ggplot(aes(fct_reorder(lang, bytes, .desc = TRUE), bytes)) +
+  geom_col() +
+  labs(title = "Languages used in GitHub repositories",
+       subtitle = "Total bytes of code in top 10 languages",
+       caption = "Data: <https://open-archaeo.info> and the GitHub API",
+       x = NULL, y = "Bytes")
 ```
 
 ### Repository contributors
@@ -110,15 +125,14 @@ oarch$gh_lang %>%
 ```{r plot-gh_contributors-histogram}
 oarch %>% 
   drop_na(gh_repo) %>% 
-  unnest(gh_contributors) %>% 
-  mutate(gh_repo = paste(gh_owner, gh_repo, sep = "/")) %>% 
+  unnest(gh_contribs) %>% 
   group_by(gh_repo) %>% 
   summarise(n = n(), .groups = "drop") %>% 
   ggplot(aes(x = n)) +
   geom_histogram(binwidth = 1) +
   labs(
-    title = "Repositories by number of contributors",
+    title = "Repository contributors",
     caption = "Data: <https://open-archaeo.info> and the GitHub API",
-    x = "Contributors", y = "Repositories"
+    x = "Number of contributors", y = "Number of repositories"
   )
 ```
