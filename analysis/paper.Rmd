@@ -32,32 +32,61 @@ The criteria for inclusion in open-archaeo are [...].
 The search strategy for compiling it was [...].
 
 ```{r data-oarch}
-oarch <- read_csv("https://raw.githubusercontent.com/zackbatist/open-archaeo/master/open-archaeo.csv")
+read_csv("https://raw.githubusercontent.com/zackbatist/open-archaeo/master/open-archaeo.csv") %>% 
+  mutate(category = na_if(category, "?")) %>% 
+  mutate(gh_repo = str_remove(github, "https://github.com/")) ->
+  oarch
 ```
 
 We augmented this with data from the GitHub API for records with an associated GitHub repository.
 
 ```{r data-github}
-# Pretty slow
-oarch %>% 
-  mutate(
-    gh_repo = str_remove(github, "https://github.com/"),
-    gh_repo = str_remove(gh_repo, "/$")
-  ) %>% 
-  separate(gh_repo, c("gh_owner", "gh_repo"), "/", 
-           fill = "right", extra = "drop") %>% 
-  mutate(
-    gh_lang = ght("GET /repos/{owner}/{repo}/languages", 
-                  owner = gh_owner, repo = gh_repo),
-    gh_contributors = ght("GET /repos/{owner}/{repo}/contributors",
-                          owner = gh_owner, repo = gh_repo)
-  ) ->
-  oarch
+# Warning: slow
+# TODO: map
+gh_langs <- map(oarch$gh_repo, gh_lang)
+gh_contribs <- map(oarch$gh_repo, gh_contrib)
+gh_issues <- map(oarch$gh_repo, gh_issue)
+gh_comments <- map(oarch$gh_repo, gh_comment)
+gh_commits <- map(oarch$gh_repo, function(x) { print(x); gh_commit(x) })
 ```
 
 ## Results
 
-### What languages are people using?
+### Tags and categories
+
+```{r plot-categories}
+oarch %>% 
+  group_by(category) %>% 
+  drop_na(category) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(fct_reorder(category, n), n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Open archaeology categories",
+    caption = "Data: <https://open-archaeo.info>",
+    x = NULL, y = "Number of projects"
+  )
+```
+
+```{r plot-tags}
+oarch %>% 
+  pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag", 
+               values_drop_na = TRUE) %>% 
+  group_by(tag) %>%
+  drop_na(tag) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(fct_reorder(tag, n), n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Open archaeology tags",
+    caption = "Data: <https://open-archaeo.info>",
+    x = NULL, y = "Number of projects"
+  )
+```
+
+### Use of GitHub
 
 ```{r plot-gh_lang}
 oarch$gh_lang %>% 
@@ -74,20 +103,20 @@ oarch$gh_lang %>%
        x = "Language", y = "Bytes of code")
 ```
 
-### Who is contributing?
+### Repository contributors
 
-```{r plot-gh_contributors-by-repo}
+```{r plot-gh_contributors-histogram}
 oarch %>% 
+  drop_na(gh_repo) %>% 
   unnest(gh_contributors) %>% 
   mutate(gh_repo = paste(gh_owner, gh_repo, sep = "/")) %>% 
   group_by(gh_repo) %>% 
   summarise(n = n(), .groups = "drop") %>% 
-  ggplot(aes(fct_reorder(gh_repo, n, .desc = TRUE), n)) +
-  geom_col() +
+  ggplot(aes(x = n)) +
+  geom_histogram(binwidth = 1) +
   labs(
     title = "Repositories by number of contributors",
     caption = "Data: <https://open-archaeo.info> and the GitHub API",
-    x = "Repository", y = "Number of contributors"
-  ) +
-  theme(axis.text.x = element_blank())
+    x = "Contributors", y = "Repositories"
+  )
 ```
