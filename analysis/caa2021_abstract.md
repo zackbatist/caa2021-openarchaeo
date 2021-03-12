@@ -22,7 +22,7 @@ In this paper, we survey the state of the art in archaeological software enginee
 Using *open-archaeo* (https://open-archaeo.info/), a curated list of 300+ active open source archaeological software packages, augmented with data collected from *GitHub*'s API, we seek to identify emerging norms in software development and collaboration, focusing on three key questions:
 
 1. What types of open source projects are have been developed by archaeologists over the last 5–10 years?
-2. To what extent to these projects leverage the collaborative features of *git*/*GitHub*, i.e. is it being used as a collaborative tool, or just a host?
+2. To what extent to these projects leverage the collaborative features of *git*/*GitHub*?
 3. Does collaboration in software development mirror, or differ from, collaborative practices in archaeological research more broadly?
 
 We find that collaborative open source software development in archaeology, measured both in the number of projects and discrete contributions tracked in *git* repositories, has seen a rapid and sustained increase beginning around 2015 (see figure).
@@ -34,3 +34,4 @@ However, a network analysis of repository contributors may point to some nascent
 
 We highlight areas in which archaeologists are either pooling resources for common goals or working independently and in a redundant manner, factors that may contribute to either enthusiastic upkeep or abandonment of software development projects, how various means of communication and contribution are valued, and how GitHub is leveraged for either one-way or discursive means of engaging with relevant stakeholders. 
 We consider these aspects of collaborative software development in relation to common structures, practices and challenges that bind archaeologists together as a distinct community, and draw comparisons with potentially conflicting underlying assumptions, attitudes and processes accounted for and encouraged by the infrastructures that archaeological software developers have come to rely upon.
+We demonstrate how archaeological software engineering is beginning to foster new kinds of collaborative commitments while also being rooted in established archaeological sociotechnical structures.
