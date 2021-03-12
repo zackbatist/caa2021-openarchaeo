@@ -24,6 +24,7 @@ knitr::opts_chunk$set(
 library("tidyverse")
 library("lubridate")
 library("openarchaeoCollaboration")
+library("khroma")
 ```
 
 ## Materials and methods
@@ -65,13 +66,12 @@ We augmented this with data from the GitHub API for records with an associated G
 
 ```{r data-github}
 # Warning: slow
-# TODO: map
 oarch <- mutate(oarch,
                 gh_langs = map(oarch$gh_repo, gh_lang),
                 gh_contribs = map(oarch$gh_repo, gh_contrib),
                 gh_issues = map(oarch$gh_repo, gh_issue),
                 gh_comments = map(oarch$gh_repo, gh_comment),
-                gh_commits = map(oarch$gh_repo, gh_commit),
+                gh_commits = map(oarch$gh_repo, gh_commit)
 )
 ```
 
@@ -128,19 +128,28 @@ oarch %>%
   mutate(cat_total = sum(n_commits)) %>%
   mutate(cum_commits = cumsum(n_commits)) %>%
   ggplot(aes(date, cum_commits,
-             fill = fct_reorder(rough_category, cat_total))) +
+             fill = fct_reorder(rough_category, cat_total),
+             colour = fct_reorder(rough_category, cat_total))) +
   geom_area() +
   scale_x_datetime(limits = c(ymd("2008-01-01", tz = "UTC"), NA),
-                   date_breaks = "2 years",
+                   date_breaks = "1 years",
                    date_labels = "%Y") +
-  scale_fill_discrete(guide = guide_legend(reverse = TRUE)) +
+  scale_colour_contrast(guide = NULL) +
+  scale_fill_contrast(guide = guide_legend(reverse = TRUE)) +
   labs(
-    title = "Open source archaeology",
+    title = "Open Archaeology",
     subtitle = "Cumulative commits in GitHub repositories",
     caption = "Data: <https://open-archaeo.info> and the GitHub API",
-    x = NULL, y = "Commits", fill = NULL
+    x = NULL, y = NULL, fill = NULL
   ) +
-  theme(legend.position = "bottom")
+  theme_minimal() +
+  theme(
+    text = element_text(family = "IBM Plex Sans"),
+    legend.position = "bottom", 
+    legend.justification = "right",
+    legend.margin = margin(),
+    legend.box.margin = margin()
+  )
 ```
 
 ```{r plot-gh_langs, fig.show="hold", out.width="50%"}
