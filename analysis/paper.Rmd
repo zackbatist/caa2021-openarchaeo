@@ -182,6 +182,21 @@ oarch %>%
        x = NULL, y = "Bytes")
 ```
 
+```{r plot-gh_issues-histogram}
+oarch %>% 
+  unnest(gh_issues) %>% 
+  drop_na(title) %>% 
+  group_by(repo) %>% 
+  summarise(n = n(), .groups = "drop") %>%
+  ggplot(aes(x = n)) +
+  geom_histogram(binwidth = 1) +
+  labs(
+    title = "Repository issues",
+    caption = "Data: <https://open-archaeo.info> and the GitHub API",
+    x = "Number of issues", y = "Number of repositories"
+  )
+```
+
 ### Repository contributors
 
 ```{r plot-gh_contributors-histogram}
