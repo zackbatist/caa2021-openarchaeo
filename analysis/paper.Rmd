@@ -27,6 +27,28 @@ library("openarchaeoCollaboration")
 library("khroma")
 ```
 
+## Background
+
+- Lots of reviews out there on sets of tools geared towards specific kinds of applications
+  - i.e. for aerial photo recognition, for photogrammetry, for tablet data collection, etc
+
+- A few papers encouraging use of open source tools and platforms
+  - @schmidt2020, @ducke2012, @orengo2015, @ducke2015, @ross2015, @wells2015
+
+- @jeffrey2012, @beck2012, @bevan2012 on the new kinds of engagements and commitments that openness entails
+  - @hansen2019 on the structural/systemtic challenges involved in maintaining a proper archaeological database
+  - @parsons2013, @kansa2014a on carrying over existing ideas and modes of production
+
+- On community-building
+  - @carman2017 on the community-building and @carman2006 on the social practice of digging; we might extend this to discuss extended network of archaeological practices, which now includes software development
+  - @morgan2012, @richardson2017b, @huggett2004 on encouraging wider participation within open collaboration networks
+  - @morgan2015 and @caraher2019 on anarchic ethos in archaeology, see also responses by @richardson2017; we might draw parallels with similar worldviews in open source software development (i.e. hacker and DIY culture)
+  - @sholler2019 wrote a general guide for encouraging participation within open source research projects (but not as an archaeologist)
+
+- @daems2020 on educating students to use digital tools, and @morgan2018a on problems with making tools easy to use (relates to @caraher2015's value of friction)
+  - Might also draw from @graham2019 and @graham2020 on pedagogical and exploratory aspects of hacking away
+
+
 ## Materials and methods
 
 We used *open-archaeo* <https://open-archaeo.info/>, a list of open source archaeological software and other digital resources.
@@ -145,7 +167,7 @@ oarch %>%
   theme_minimal() +
   theme(
     text = element_text(family = "IBM Plex Sans"),
-    legend.position = "bottom", 
+    legend.position = "bottom",
     legend.justification = "right",
     legend.margin = margin(),
     legend.box.margin = margin()
@@ -183,10 +205,10 @@ oarch %>%
 ```
 
 ```{r plot-gh_issues-histogram}
-oarch %>% 
-  unnest(gh_issues) %>% 
-  drop_na(title) %>% 
-  group_by(repo) %>% 
+oarch %>%
+  unnest(gh_issues) %>%
+  drop_na(title) %>%
+  group_by(repo) %>%
   summarise(n = n(), .groups = "drop") %>%
   ggplot(aes(x = n)) +
   geom_histogram(binwidth = 1) +
