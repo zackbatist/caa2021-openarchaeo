@@ -57,10 +57,17 @@ The search strategy for compiling it was [...].
 
 ```{r data-oarch}
 read_csv("https://raw.githubusercontent.com/zackbatist/open-archaeo/master/open-archaeo.csv") %>%
-  mutate(category = na_if(category, "?")) %>%
-  mutate(gh_repo = str_remove(github, "https://github.com/")) ->
+  mutate(category = na_if(category, "?")) ->
   oarch
 
+# Extract clean repos from GitHub URLs
+oarch %>% 
+  mutate(
+    gh_repo = str_match(oarch$github, "^https://github.com/([\\w-\\.]+/[\\w-\\.]+)/?.*?$")[,2]
+  ) ->
+  oarch
+
+# Amalgamate categories into fewer rough categories
 oarch <- mutate(oarch, rough_category = recode(category,
                                  "R" = "Packages (R, Python, etc.)",
                                  "Web apps" = "Standalone apps",
