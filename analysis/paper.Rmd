@@ -52,6 +52,14 @@ Research objectives and questions:
   * Collaboration over time: is the use of these features becoming more common?
 * Does collaboration in software development mirror, or differ from, collaborative practices in archaeological research more broadly?
 
+ZB note: The following relates to what we were discussing last week, and hopefully is a start at making our research questions more relevant to general discourse. We can heavily modify this if we do not want to get too far into the general discourse.
+
+This survey will help identify factors that contribute the simultaneous growth and stagnation of archaeological software development. The extreme optimism expressed during the early 2010s regarding the potential value that open source development models would bring (particularly in the 2012 special issue of World Archaeology) has been both realized and slow to take off. Open source is either a perpetual novelty or a normalized attitude in different circles. In this sense, our study is primarily about the development of norms and practices, and the delegation or distribution of various kinds of activities, throughout the archaeological community.
+
+We do this is by leveraging metrics of contributions made by involved participants. These metrics reflect how work is _actually_ delegated or distributed, which tempers and perhaps even contradicts common conceptions about how collaborative software development operates.
+
+We emphasize how on highlighting the unique flavour of open source software development that pertains to archaeology specifically. It's ok if we are not purists, or if we do not operate in the same ways as other scientific disciplines or Silicon Valley startups. We have our own constraints to deal with, and our own distinct goals, mindsets and modes of organizing ourselves that differ from those communities. Our goal in this paper is to identify what's going on, to highlight our unique archaeological open source culture, and how that culture has emerged and continues to develop.
+
 ## Background
 
 - Lots of reviews out there on sets of tools geared towards specific kinds of applications
@@ -73,12 +81,13 @@ Research objectives and questions:
 - @daems2020 on educating students to use digital tools, and @morgan2018a on problems with making tools easy to use (relates to @caraher2015's value of friction)
   - Might also draw from @graham2019 and @graham2020 on pedagogical and exploratory aspects of hacking away
 
-
 ## Materials and methods
 
-We used *open-archaeo* <https://open-archaeo.info/>, a list of open source archaeological software and other digital resources.
-The criteria for inclusion in open-archaeo are [...].
-The search strategy for compiling it was [...].
+We used *open-archaeo* <https://open-archaeo.info/>, a list of open source archaeological software and other digital resources. As of June 8, 2021, 401 items are listed. Items are included in open-archaeo if a project is identified by its maintainers as relating to archaeological work.
+
+The dataset was compiled by browsing collaborative software development platforms, essentially manually crawling through the profiles of users who identify as archaeologists or who have contributed to tools that pertain to archaeological work. This quasi-systematic collection strategy was also supplemented by contributions made by interested individuals who identified relevant work that was initially overlooked.
+
+Open-archaeo is a relatively comprehensive list, however it generally lacks code written before the growth and general use of collaborative software development platforms among archaeologists (which seems to have began during the early-2010s) and code that is not available on the web. Additionally, items pertaining to various specialist domains may be spotty, owing to the limited experiences of the list's primary maintainers. To help resolve this issue, open-archaeo has put out a call specialists to perform 'deep dives' into the software ecosystems pertaining to their methodological or subject domains. Thus far, one 'deep dive' into tools used in archaeogenetics has been initiated.
 
 ```{r data-oarch}
 read_csv("https://raw.githubusercontent.com/zackbatist/open-archaeo/master/open-archaeo.csv") %>%
@@ -129,6 +138,22 @@ oarch <- mutate(oarch,
                 gh_commits = map(oarch$gh_repo, gh_commit)
 )
 ```
+
+Each record is also annotated with tags that describe the aspects of archaeological work that each tool contributes to. Items are tagged based on how they have been identified or presented by their maintainers. The list of tags and their associated definitions is subject to grow or change as archaeologists continue to develop software for additional use cases.
+
+Records are also categorized based on how each tool or resource is accessed or used. This gives us a sense of the pervasiveness of various development models, and the requirements or dependent knowledge that devs impose on their users.
+
+Two kinds of categories have been defined: software and documents. Software comprise collections of instructions that dictate how a computer should operate. Documents are bounded sets of recorded information. Three categories of software and four categories of documents are defined below.
+
+|Category|Kind|Scope|
+|:-------|:---|:----|
+|Packages and libraries|Software|Sets of functions assembled with clear purpose, and made accessible using standards established by an underlying platform.|
+|Standalone software|Software|Software that may be operated without needing to first access an underlying platform.|
+|Scripts|Software|Sets of pragmatically assembled mutable functions, often lacking complete documentation or adherence to protocols that would otherwise facilitate secondary use outside their original contexts of creation.|
+|Specifications, protocols and schemas|Documents|A formal data structure or framework intended to be used as a model.|
+|Products|Documents|Stable outcomes of creative work.|
+|Guides|Documents|An educational resource or documented protocol meant to instruct readers how to apply relevant tools or techniques.|
+|Lists and datasets|Documents|A series of consistently organized observations assembled with purpose.|
 
 ## Results
 
@@ -249,6 +274,7 @@ oarch %>%
        caption = "Data: open-archaeo.info",
        x = NULL, y = "Number of projects")
 ```
+ZB note: How many users per platform? Codeberg is second but only has one user.
 
 How many are explicitly licensed? What are the most popular licenses?
 
@@ -297,6 +323,7 @@ oarch %>%
     legend.box.margin = margin()
   )
 ```
+ZB note / idea: Plot the dates of the first commits from each project to track the initiation of projects over time. Then a secondary analysis does the same thing but with a filter to limit the dataset to include only those projects with a certain minimum number of commits or issues (or whatever metric for activity we plan to use), or that have had activity during the past 3 months, i.e. what are the ages of projects that actually had active or ongoing development, or that are still active today? This might indicate the average lifespans of projects, or the properties of particularly active projects can be dissected to identify common practices that we can infer are the causes of their liveliness.
 
 #### Growth
 
@@ -342,3 +369,8 @@ oarch %>%
 #### Collaborative networks
 
 If we construct a network linking repositories by their common contributors, can we identify emerging networks of collaboration, or are individual projects still largely isolated? If there are networks, what characterises their links?
+
+ZB: I'm speculating that there are going to be various users who have their fingers in many projects, and that those projects tend to be the most active. If this is the case, I would further speculate that these people hold a different attitude regarding authorship and the dividuality of projects that is more in sync with the collaborative capabilities of open source, which are at odds with traditional academic norms regarding how contributions are credited and how products are produced are disseminated.
+
+
+
