@@ -27,6 +27,31 @@ library("openarchaeoCollaboration")
 library("khroma")
 ```
 
+## Introduction
+
+Research objectives and questions:
+
+* What types of open source projects are being developed by archaeologists?
+  * How many projects are there?
+  * What do they do?
+  * What languages are they written in and/or what platform do they use?
+  * How has this changed over time?
+* To what extent to these projects leverage tools for collaborative software engineering?
+  * How many entries use version control?
+  * How many entries have an explicit license?
+  * What are the most popular licenses?
+  * What are the most popular repository hosts?
+  * How active is the average repository?
+  * How fast have repositories been growing?
+  * How many people contribute to individual repositories?
+  * What roles do contributors to repositories have?
+  * Are networks of collaboration emerging?
+  * Contributions over time: is open source software in archaeology growing?
+  * How frequently used are forks, pull requests, issues, and comments used?
+  * How frequently used are 'engagement' features like stars, follows, and releases?
+  * Collaboration over time: is the use of these features becoming more common?
+* Does collaboration in software development mirror, or differ from, collaborative practices in archaeological research more broadly?
+
 ## Background
 
 - Lots of reviews out there on sets of tools geared towards specific kinds of applications
@@ -68,6 +93,7 @@ oarch %>%
   oarch
 
 # Amalgamate categories into fewer rough categories
+# TODO: redo
 oarch <- mutate(oarch, rough_category = recode(category,
                                  "R" = "Packages (R, Python, etc.)",
                                  "Web apps" = "Standalone apps",
@@ -106,7 +132,11 @@ oarch <- mutate(oarch,
 
 ## Results
 
-### Tags and categories
+### Open archaeology
+
+TODO [ZB]: Can you explain the logic behind the taxonomies, either here or in materials?
+
+#### Categories and tags
 
 ```{r plot-categories}
 oarch %>%
@@ -117,13 +147,13 @@ oarch %>%
   geom_col() +
   coord_flip() +
   labs(
-    title = "Open archaeology categories",
-    caption = "Data: <https://open-archaeo.info>",
+    title = "Categories",
+    caption = "Data: open-archaeo.info",
     x = NULL, y = "Number of projects"
   )
 ```
 
-```{r plot-tags}
+```{r plot-tags, fig.asp=2}
 oarch %>%
   pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag",
                values_drop_na = TRUE) %>%
@@ -134,13 +164,100 @@ oarch %>%
   geom_col() +
   coord_flip() +
   labs(
-    title = "Open archaeology tags",
-    caption = "Data: <https://open-archaeo.info>",
+    title = "Tags",
+    caption = "Data: open-archaeo.info",
     x = NULL, y = "Number of projects"
   )
 ```
 
-### Use of GitHub
+#### Languages and platforms
+
+The GitHub API provides data on the languages used in a repository based on an automated machine learning algorithm.
+Since most repositories use more than one language—if only one for the actual software, and another (e.g. HTML) for documentation—this data is presented as a table of languages and the number of bytes of code in that language detected in the repository.
+We can therefore measure the popularity of languages across repositories in a couple of ways: based on how many repositories use a language at all; or based on how many bytes of that language are present.
+
+```{r plot-gh_langs, fig.show="hold", out.width="50%"}
+oarch %>%
+  unnest(gh_langs) %>%
+  drop_na(lang, bytes) %>%
+  group_by(lang) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  arrange(-n) %>%
+  slice(1:10) %>%
+  ggplot(aes(fct_reorder(lang, n, .desc = TRUE), n)) +
+  geom_col() +
+  labs(title = "Repository languages",
+       subtitle = "Number of repositories using top 10 languages",
+       caption = "Data: open-archaeo.info and GitHub API",
+       x = NULL, y = "Number of repositories")
+
+oarch %>%
+  unnest(gh_langs) %>%
+  drop_na(lang, bytes) %>%
+  group_by(lang) %>%
+  summarise(bytes = sum(bytes), .groups = "drop") %>%
+  arrange(-bytes) %>%
+  slice(1:10) %>%
+  ggplot(aes(fct_reorder(lang, bytes, .desc = TRUE), bytes)) +
+  geom_col() +
+  labs(title = "Repository languages",
+       subtitle = "Total bytes of code in top 10 languages",
+       caption = "Data: open-archaeo.info and GitHub API",
+       x = NULL, y = "Bytes")
+```
+
+Looking at number of bytes puts C++ and the web languages (HTML, PHP, and Javascript) on top, but this is probably affected by the relative verboseness of these languages and the popularity of web-based documentation across implementation languages. The number of repositories is probably more reliable and shows the popularity of scientific programming languages—R and Python—followed by web languages and then compiled C and C++.
+
+We also have a 'platform' taxonomy, which is a manually-classified description of the broad framework that the individual projects rely on.
+
+```{r plot-platforms}
+oarch %>%
+  group_by(platform) %>%
+  drop_na(platform) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(fct_reorder(platform, n), n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Repository platforms",
+    caption = "Data: open-archaeo.info",
+    x = NULL, y = "Number of projects"
+  )
+```
+
+Here again we see R is overwhelmingly dominant; closely followed by Python.
+Plugins for QGIS and mobile apps are also relatively popular.
+The remainder show a rather fragmented landscape of plugins for other desktop software (e.g. AutoCAD, ArcGIS); lesser used programming languages; and custom form and spreadsheet templates.
+
+### Open source
+
+#### Code availability and license
+
+All entries on open-archaeo include source code in some form, but how many have a version-controlled repository? What repository hosts are the most popular?
+
+```{r plot-repo-hosts}
+# TODO: add "none"
+oarch %>% 
+  pivot_longer(c(github, gitlab, bitbucket, launchpad, codeberg),
+               names_to = "repo_host", values_to = "repo_url") %>% 
+  drop_na(repo_url) %>% 
+  count(repo_host) %>% 
+  arrange(-n) %>%
+  ggplot(aes(fct_reorder(repo_host, n, .desc = TRUE), n)) +
+  geom_col() +
+  labs(title = "Repository hosts",
+       caption = "Data: open-archaeo.info",
+       x = NULL, y = "Number of projects")
+```
+
+How many are explicitly licensed? What are the most popular licenses?
+
+#### Repository activity
+
+(On GitHub:)
+
+  * How active is the average repository?
+  * How fast have repositories been growing?
 
 ```{r plot-gh_commits-cum}
 oarch %>%
@@ -181,35 +298,30 @@ oarch %>%
   )
 ```
 
-```{r plot-gh_langs, fig.show="hold", out.width="50%"}
-oarch %>%
-  unnest(gh_langs) %>%
-  drop_na(lang, bytes) %>%
-  group_by(lang) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  arrange(-n) %>%
-  slice(1:10) %>%
-  ggplot(aes(fct_reorder(lang, n, .desc = TRUE), n)) +
-  geom_col() +
-  labs(title = "Languages used in GitHub repositories",
-       subtitle = "Number of repositories using top 10 languages",
-       caption = "Data: <https://open-archaeo.info> and the GitHub API",
-       x = NULL, y = "Number of repositories")
+#### Growth
 
+### Collaboration
+
+#### Number of collaborators and roles
+
+```{r plot-gh_contributors-histogram}
 oarch %>%
-  unnest(gh_langs) %>%
-  drop_na(lang, bytes) %>%
-  group_by(lang) %>%
-  summarise(bytes = sum(bytes), .groups = "drop") %>%
-  arrange(-bytes) %>%
-  slice(1:10) %>%
-  ggplot(aes(fct_reorder(lang, bytes, .desc = TRUE), bytes)) +
-  geom_col() +
-  labs(title = "Languages used in GitHub repositories",
-       subtitle = "Total bytes of code in top 10 languages",
-       caption = "Data: <https://open-archaeo.info> and the GitHub API",
-       x = NULL, y = "Bytes")
+  drop_na(gh_repo) %>%
+  unnest(gh_contribs) %>%
+  group_by(gh_repo) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  ggplot(aes(x = n)) +
+  geom_histogram(binwidth = 1) +
+  labs(
+    title = "Repository contributors",
+    caption = "Data: <https://open-archaeo.info> and the GitHub API",
+    x = "Number of contributors", y = "Number of repositories"
+  )
 ```
+
+#### Forks and pull requests
+
+#### Issues and comments
 
 ```{r plot-gh_issues-histogram}
 oarch %>%
@@ -226,19 +338,7 @@ oarch %>%
   )
 ```
 
-### Repository contributors
 
-```{r plot-gh_contributors-histogram}
-oarch %>%
-  drop_na(gh_repo) %>%
-  unnest(gh_contribs) %>%
-  group_by(gh_repo) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  ggplot(aes(x = n)) +
-  geom_histogram(binwidth = 1) +
-  labs(
-    title = "Repository contributors",
-    caption = "Data: <https://open-archaeo.info> and the GitHub API",
-    x = "Number of contributors", y = "Number of repositories"
-  )
-```
+#### Collaborative networks
+
+If we construct a network linking repositories by their common contributors, can we identify emerging networks of collaboration, or are individual projects still largely isolated? If there are networks, what characterises their links?
