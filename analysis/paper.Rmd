@@ -383,7 +383,60 @@ oarch %>%
   )
 ```
 
-TODO: barcode plot (see above)
+```{r lifespan-stats}
+oarch %>% 
+  unnest(gh_commits) %>% 
+  drop_na(datetime) %>% 
+  group_by(item_name) %>%
+  summarise(
+    n = n(),
+    first_commit = min(datetime),
+    last_commit = max(datetime),
+    lifespan = as.integer(last_commit - first_commit),
+    commit_rate = n / lifespan
+  ) ->
+  oarch_lifespan
+```
+
+```{r plot-lifespan-hist}
+oarch_lifespan %>% 
+  ggplot(aes(x = lifespan)) +
+  geom_histogram() +
+  labs(
+    title = "Project lifespan",
+    subtitle = "Time between first and latest commit",
+    x = "Days", y = "Repositories",
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+```
+```{r plot-rate-hist}
+oarch_lifespan %>% 
+  ggplot(aes(x = commit_rate)) +
+  geom_histogram() +
+  labs(
+    title = "Project activity",
+    subtitle = "Average commit rate",
+    x = "Commits per day", y = "Repositories",
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+```
+
+What are the characteristics of long-lived and/or active repositories?
+
+```{r plot-lifespan-vs-rate}
+oarch_lifespan %>% 
+  ggplot(aes(x = lifespan, y = commit_rate)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10() +
+  labs(
+    title = "Project lifespan vs. average commit rate",
+    x = "Lifespan (days)", y = "Commits per day",
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+```
+
+TODO: ZB: Any ideas for other relevant factors? Lots of ways you could go here...
 
 #### Growth
 
