@@ -195,6 +195,31 @@ oarch %>%
   )
 ```
 
+Which tags co-occur more often?
+
+```{r plot-tags-combo}
+# NB. Plot in a big window if you want to actually read this!
+oarch %>%
+  pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag",
+               values_drop_na = TRUE) %>%
+  select(item_name, tag) %>% 
+  left_join(., ., by = "item_name") %>% # Join to self
+  group_by(tag.x, tag.y) %>% 
+  count() %>% 
+  filter(tag.x != tag.y) %>% 
+  ggplot(aes(tag.x, tag.y, label = n)) +
+  geom_tile(fill = "black") +
+  geom_text(colour = "white") +
+  scale_fill_davos(guide = guide_none()) +
+  coord_fixed() +
+  labs(title = "Co-occurrence of tags",
+       caption = "Data: open-archaeo.info",
+       x = NULL, y = NULL) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1)
+  )
+```
+
 #### Languages and platforms
 
 TODO: colour by platform
