@@ -52,13 +52,16 @@ Research objectives and questions:
   * Collaboration over time: is the use of these features becoming more common?
 * Does collaboration in software development mirror, or differ from, collaborative practices in archaeological research more broadly?
 
-ZB note: The following relates to what we were discussing last week, and hopefully is a start at making our research questions more relevant to general discourse. We can heavily modify this if we do not want to get too far into the general discourse.
+Over the past 10-15 years, archaeologists have embraced, at least in theory, the advent of open source software development. There has been a lot of optimism regarding the potential value that archaeological software development would bring (particularly in the 2012 special issue of World Archaeology), however depending on who you talk to, creative use of computers among archaeologists has either been a perpetual novelty or a normalized way of working.
 
-This survey will help identify factors that contribute the simultaneous growth and stagnation of archaeological software development. The extreme optimism expressed during the early 2010s regarding the potential value that open source development models would bring (particularly in the 2012 special issue of World Archaeology) has been both realized and slow to take off. Open source is either a perpetual novelty or a normalized attitude in different circles. In this sense, our study is primarily about the development of norms and practices, and the delegation or distribution of various kinds of activities, throughout the archaeological community.
+In this paper, we survey the field of archaeological software development in order to understand how archaeologists are _actually_ creating code. We rely rely on a data set called open-archaeo, which is a comprehensive list of software and resources developed by archaeologists for archaeological purposes. This is supplemented by data collected by GitHub, a collaborative open source software development platform that hosts the vast majority of projects listed in open-archaeo, and which automatically tracks users' contributions to various projects.
 
-We do this is by leveraging metrics of contributions made by involved participants. These metrics reflect how work is _actually_ delegated or distributed, which tempers and perhaps even contradicts common conceptions about how collaborative software development operates.
+The metrics we use reflect how work is distributed across time and delegated among members of a project and among the community as a whole. These data are analyzed to highlight how collaborative software development operates within our community.
 
-We emphasize how on highlighting the unique flavour of open source software development that pertains to archaeology specifically. It's ok if we are not purists, or if we do not operate in the same ways as other scientific disciplines or Silicon Valley startups. We have our own constraints to deal with, and our own distinct goals, mindsets and modes of organizing ourselves that differ from those communities. Our goal in this paper is to identify what's going on, to highlight our unique archaeological open source culture, and how that culture has emerged and continues to develop.
+This aspect of _collaborative_ software development is crucial to our interest in the historical development of software engineering among archaeologists. Archaeological software development is often (or nearly always) discussed as _open source_ software development. A technical definition of open source software is software whose source code is publicly accessible, and which is free to be used, modified or built upon by anyone and for any purpose. This implies, but does not necessarily require or benefit from, various collaborative endeavours. For instance, code written by a single person that is distributed under an open license, but which is never accessed or reused at any point after it is made available, meets this technical definition of open source, but misses out on the potential value that may be contributed by others. A revised definition of open source software defines it as software developed in a collaborative manner, as code that belongs to the community of developers, users and stakeholders who find value in the product and strive for its continued development and iterative improvement. We do not deny solitary software developers as members of a broader community; however their behaviour as solitary developers may imply the existence of widespread norms that encourage more basic, but perhaps less fulfilling, ways of working.
+
+In this sense, our study is about the development of norms and practices throughout the archaeological software development community. We have our own unique flavour, based on our distinct goals, constraints, mindsets and modes of organizing ourselves as archaeologists, which shape how we write code. Our goal in this paper is to highlight how our archaeological open source culture has emerged and continues to develop.
+
 
 ## Background
 
@@ -161,7 +164,11 @@ Two kinds of categories have been defined: software and documents. Software comp
 
 TODO [ZB]: Can you explain the logic behind the taxonomies, either here or in materials?
 
-#### Categories and tags
+#### Categories, tags, platforms and hosts
+
+So let's start by breaking down the data set.
+
+This plot indicates that most projects included in open-archaeo are designed to be used as a package or library atop a platform. The designers of this code are basically creating missing functions within the base platform that are useful for archaeological purposes. Some are also creating software to be run independently of any platform. A significant amount of projects also comprise of datasets and non-packaged code snippets that have been made available for general use.
 
 ```{r plot-categories}
 oarch %>%
@@ -177,6 +184,35 @@ oarch %>%
     x = NULL, y = "Number of projects"
   )
 ```
+
+```{r plot-platforms}
+oarch %>%
+  group_by(platform) %>%
+  drop_na(platform) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(fct_reorder(platform, n), n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Repository platforms",
+    caption = "Data: open-archaeo.info",
+    x = NULL, y = "Number of projects"
+  )
+```
+
+R is overwhelmingly dominant as a platform, closely followed by Python.
+Plugins for QGIS and mobile apps are also relatively popular.
+The remainder show a rather fragmented landscape of plugins for other desktop software (e.g. AutoCAD, ArcGIS); lesser used programming languages; and custom form and spreadsheet templates.
+
+When we break it down by number of unique contributors, we can account for the popularity of a platform in terms of share of the general population, regardless of how prolific their user-base is.
+
+ZB: Break down platform by contributors, since a few people may be prolific in their support of a platform without necessarily representing the whole population.
+
+If we compare categories with tags, we can see the general domains that each kind of resource is designed to serve.
+
+ZB: Compare tags with categories, to see the purposes of standalone software, datasets, guides, etc.
+
+If we look at tags on their own, we can see which domains of archaeological research software is primarily being developed for. However, many items listed in open-archaeo have more than one tag. Based on an analysis of the co-occurence of tags, we infer that [...].
 
 ```{r plot-tags, fig.asp=2}
 # TODO: some merging of tags
@@ -195,8 +231,6 @@ oarch %>%
     x = NULL, y = "Number of projects"
   )
 ```
-
-Which tags co-occur more often?
 
 ```{r plot-tags-combo}
 # NB. Plot in a big window if you want to actually read this!
@@ -220,6 +254,36 @@ oarch %>%
     axis.text.x = element_text(angle = 90, hjust = 1)
   )
 ```
+
+The vast majority of projects included in open-archaeo are hosted on GitHub, but a few other hosts are used too. If we break this down by number of unique project maintainers, GitHub still remains dominant, but we see that each other platform is only used by a handful of individuals.
+
+```{r plot-repo-hosts}
+# TODO: add "none"
+# TODO: version with unique authors
+oarch %>% 
+  pivot_longer(c(github, gitlab, bitbucket, launchpad, codeberg),
+               names_to = "repo_host", values_to = "repo_url") %>% 
+  drop_na(repo_url) %>% 
+  count(repo_host) %>% 
+  arrange(-n) %>%
+  ggplot(aes(fct_reorder(repo_host, n, .desc = TRUE), n)) +
+  geom_col() +
+  labs(title = "Repository hosts",
+       caption = "Data: open-archaeo.info",
+       x = NULL, y = "Number of projects")
+```
+
+ZB: Plot host by number of unique users.
+
+How many are explicitly licensed? What are the most popular licenses?
+
+
+We also plotted the development of new software over time.
+
+ZB: Do a temporal analysis to get a sense of when platforms, tags and categories have been gaining popularity. There may not be a need for extreme detail here, but simply noting the dates of first commits might be helpful. I'm imagining a stacked bar chart, with each bar representing a month or a year, and with the stacked portions of each bar representing a platform or category.
+
+
+<<< cut? >>>
 
 #### Languages and platforms
 
@@ -263,51 +327,13 @@ Looking at number of bytes puts C++ and the web languages (HTML, PHP, and Javasc
 
 We also have a 'platform' taxonomy, which is a manually-classified description of the broad framework that the individual projects rely on.
 
-```{r plot-platforms}
-oarch %>%
-  group_by(platform) %>%
-  drop_na(platform) %>%
-  summarise(n = n()) %>%
-  ggplot(aes(fct_reorder(platform, n), n)) +
-  geom_col() +
-  coord_flip() +
-  labs(
-    title = "Repository platforms",
-    caption = "Data: open-archaeo.info",
-    x = NULL, y = "Number of projects"
-  )
-```
+<<< /cut? >>>
 
-Here again we see R is overwhelmingly dominant; closely followed by Python.
-Plugins for QGIS and mobile apps are also relatively popular.
-The remainder show a rather fragmented landscape of plugins for other desktop software (e.g. AutoCAD, ArcGIS); lesser used programming languages; and custom form and spreadsheet templates.
 
-### Open source
-
-#### Code availability and license
-
-All entries on open-archaeo include source code in some form, but how many have a version-controlled repository? What repository hosts are the most popular?
-
-```{r plot-repo-hosts}
-# TODO: add "none"
-# TODO: version with unique authors
-oarch %>% 
-  pivot_longer(c(github, gitlab, bitbucket, launchpad, codeberg),
-               names_to = "repo_host", values_to = "repo_url") %>% 
-  drop_na(repo_url) %>% 
-  count(repo_host) %>% 
-  arrange(-n) %>%
-  ggplot(aes(fct_reorder(repo_host, n, .desc = TRUE), n)) +
-  geom_col() +
-  labs(title = "Repository hosts",
-       caption = "Data: open-archaeo.info",
-       x = NULL, y = "Number of projects")
-```
-ZB note: How many users per platform? Codeberg is second but only has one user.
-
-How many are explicitly licensed? What are the most popular licenses?
 
 #### Repository activity
+
+The next set of analyses relies on the GitHub API to assess the leverage data about the activity occurring within each repository. To simplify our analysis and maintain a consistent dataset for the subsequent set of analyses, we excluded data from other hosts such as Codeberg or BitBucket, which cumulativey amount to only n items (XX% of the total).
 
 
 ```{r plot-gh_commits-cum}
@@ -350,6 +376,10 @@ oarch %>%
 ```
 
 Use of GitHub has been growing consistently since around 2014, but how is this activity distributed across repositories?
+
+We found that the mean/median/mode lifespan of a project is XX months. Projects that have had some activity during the past 3 months have ages ranging from XX-YY months ago.
+
+ZB: Add columns to the right of the project lifespan plot with values showing commits per day, number of unique contributors, number of days between first and last commit, and any other relevant variables. Then discuss relationships between these variables.
 
 ```{r plot-lifespan}
 min_commits <- 5
@@ -408,6 +438,7 @@ oarch_lifespan %>%
     caption = "Data: open-archaeo.info and GitHub API"
   )
 ```
+
 ```{r plot-rate-hist}
 oarch_lifespan %>% 
   ggplot(aes(x = commit_rate)) +
@@ -422,6 +453,12 @@ oarch_lifespan %>%
 
 What are the characteristics of long-lived and/or active repositories?
 
+Projects with a short span of activity tend to have very high commit frequency, whereas there is much more variety in long-term projects. Among projects with a greater lifespan, those with more total commits have much more frequent activity than those with fewer total commits, which represent the majority of long-lived projects.
+
+Some of this can be explained in terms of natural processes (i.e. the only way to fit a high number of commits within the same span as a project with a low number of commits is to commit more frequently)
+
+But when we break it down by number of contributors [...]
+
 ```{r plot-lifespan-vs-rate}
 oarch_lifespan %>% 
   ggplot(aes(x = lifespan, y = commit_rate, size = n)) +
@@ -434,6 +471,11 @@ oarch_lifespan %>%
     caption = "Data: open-archaeo.info and GitHub API"
   )
 ```
+
+The measures of activity may also be compared with the tags.
+
+ZB: Lifespan by tag is dominated by ancient DNA tags. Another hint that it may be best to lump all of those. In general though, I'm not sure how helpful the following tables are, unless we account for volume somehow.
+
 
 ```{r plot-lifespan-activity-tags}
 #TODO: think we might need some exclusion rules here 
@@ -540,6 +582,8 @@ oarch %>%
   )
 ```
 
+ZB: Add a chart, limited to repos with more than 1 contributor. It should present how evenly distributed commits are across all contributors. So maybe a percent stacked bar chart, with bars representing a repository, with each bar broken down into sections representing each inidividual contributor, and each section's size representing the percentage of the individual's commits out of the total from the repo.
+
 #### Forks and pull requests
 
 #### Issues and comments
@@ -559,6 +603,7 @@ oarch %>%
   )
 ```
 
+ZB: How could we compare number of commits with number of issues? Some sort of coefficient, like commits divided by issues? Would this even be valuable at all?
 
 #### Collaborative networks
 
