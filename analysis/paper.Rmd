@@ -197,11 +197,15 @@ oarch %>%
 
 #### Languages and platforms
 
+TODO: colour by platform
+
 The GitHub API provides data on the languages used in a repository based on an automated machine learning algorithm.
 Since most repositories use more than one language—if only one for the actual software, and another (e.g. HTML) for documentation—this data is presented as a table of languages and the number of bytes of code in that language detected in the repository.
 We can therefore measure the popularity of languages across repositories in a couple of ways: based on how many repositories use a language at all; or based on how many bytes of that language are present.
 
 ```{r plot-gh_langs, fig.show="hold", out.width="50%"}
+# TODO: some merging of tags
+# TODO: a crosstab/heatmap of tag combinations
 oarch %>%
   unnest(gh_langs) %>%
   drop_na(lang, bytes) %>%
@@ -262,6 +266,7 @@ All entries on open-archaeo include source code in some form, but how many have 
 
 ```{r plot-repo-hosts}
 # TODO: add "none"
+# TODO: version with unique authors
 oarch %>% 
   pivot_longer(c(github, gitlab, bitbucket, launchpad, codeberg),
                names_to = "repo_host", values_to = "repo_url") %>% 
@@ -325,9 +330,17 @@ oarch %>%
 ```
 ZB note / idea: Plot the dates of the first commits from each project to track the initiation of projects over time. Then a secondary analysis does the same thing but with a filter to limit the dataset to include only those projects with a certain minimum number of commits or issues (or whatever metric for activity we plan to use), or that have had activity during the past 3 months, i.e. what are the ages of projects that actually had active or ongoing development, or that are still active today? This might indicate the average lifespans of projects, or the properties of particularly active projects can be dissected to identify common practices that we can infer are the causes of their liveliness.
 
+TODO: barcode plot (see above)
+
 #### Growth
 
 ### Collaboration
+
+TODO: For this we need **covariaties**! Could be:
+
+* Domain (tags and categories)
+* Time
+* Social aspects: e.g. centrality extracted from network analysis
 
 #### Number of collaborators and roles
 
