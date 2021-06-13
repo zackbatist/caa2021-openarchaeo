@@ -179,6 +179,7 @@ oarch %>%
 ```
 
 ```{r plot-tags, fig.asp=2}
+# TODO: some merging of tags
 oarch %>%
   pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag",
                values_drop_na = TRUE) %>%
@@ -229,8 +230,6 @@ Since most repositories use more than one language—if only one for the actual 
 We can therefore measure the popularity of languages across repositories in a couple of ways: based on how many repositories use a language at all; or based on how many bytes of that language are present.
 
 ```{r plot-gh_langs, fig.show="hold", out.width="50%"}
-# TODO: some merging of tags
-# TODO: a crosstab/heatmap of tag combinations
 oarch %>%
   unnest(gh_langs) %>%
   drop_na(lang, bytes) %>%
