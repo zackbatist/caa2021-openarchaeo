@@ -424,13 +424,13 @@ What are the characteristics of long-lived and/or active repositories?
 
 ```{r plot-lifespan-vs-rate}
 oarch_lifespan %>% 
-  ggplot(aes(x = lifespan, y = commit_rate)) +
+  ggplot(aes(x = lifespan, y = commit_rate, size = n)) +
   geom_point() +
   scale_x_log10() +
   scale_y_log10() +
   labs(
     title = "Project lifespan vs. average commit rate",
-    x = "Lifespan (days)", y = "Commits per day",
+    x = "Lifespan (days)", y = "Commits per day", size = "Total commits",
     caption = "Data: open-archaeo.info and GitHub API"
   )
 ```
