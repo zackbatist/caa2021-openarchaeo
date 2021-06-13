@@ -309,10 +309,6 @@ How many are explicitly licensed? What are the most popular licenses?
 
 #### Repository activity
 
-(On GitHub:)
-
-  * How active is the average repository?
-  * How fast have repositories been growing?
 
 ```{r plot-gh_commits-cum}
 oarch %>%
@@ -353,7 +349,7 @@ oarch %>%
   )
 ```
 
-ZB note / idea: Plot the dates of the first commits from each project to track the initiation of projects over time. Then a secondary analysis does the same thing but with a filter to limit the dataset to include only those projects with a certain minimum number of commits or issues (or whatever metric for activity we plan to use), or that have had activity during the past 3 months, i.e. what are the ages of projects that actually had active or ongoing development, or that are still active today? This might indicate the average lifespans of projects, or the properties of particularly active projects can be dissected to identify common practices that we can infer are the causes of their liveliness.
+Use of GitHub has been growing consistently since around 2014, but how is this activity distributed across repositories?
 
 ```{r plot-lifespan}
 min_commits <- 5
@@ -382,6 +378,9 @@ oarch %>%
     caption = "Data: open-archaeo.info and GitHub API"
   )
 ```
+
+So we can see the "lifespan" and activity varies across repositories.
+But how exactly?
 
 ```{r lifespan-stats}
 oarch %>% 
@@ -436,13 +435,89 @@ oarch_lifespan %>%
   )
 ```
 
+```{r plot-lifespan-activity-tags}
+#TODO: think we might need some exclusion rules here 
+
+left_join(oarch_lifespan, oarch, by = c("item_name")) %>% 
+  pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag",
+               values_drop_na = TRUE) %>%
+  drop_na(tag) %>% 
+  group_by(tag) %>%
+  summarise(avg_lifespan = mean(lifespan),
+            avg_commit_rate = mean(commit_rate)) ->
+  oarch_lifespan_by_tag
+
+oarch_lifespan_by_tag %>% 
+  arrange(-avg_lifespan) %>% 
+  slice(1:10) %>% 
+  ggplot(aes(x = fct_reorder(tag, avg_lifespan, .desc = TRUE),
+             y = avg_lifespan)) +
+  geom_col() +
+  labs(
+    title = "Project lifespan by tag",
+    subtitle = "Top 10 longest-lived tags",
+    x = NULL, y = "Average lifespan (days)",
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+
+oarch_lifespan_by_tag %>% 
+  arrange(-avg_commit_rate) %>% 
+  slice(1:10) %>% 
+  ggplot(aes(x = fct_reorder(tag, avg_commit_rate, .desc = TRUE),
+             y = avg_commit_rate)) +
+  geom_col() +
+  labs(
+    title = "Project activity by tag",
+    subtitle = "Top 10 most activity tags",
+    x = NULL, y = "Average activity (commits per day)",
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+```
+
+```{r plot-lifespan-activity-cats}
+#TODO: Eliminate Infs
+
+left_join(oarch_lifespan, oarch, by = c("item_name")) %>% 
+  drop_na(category) %>% 
+  group_by(category) %>%
+  summarise(avg_lifespan = mean(lifespan),
+            avg_commit_rate = mean(commit_rate)) ->
+  oarch_lifespan_by_cat
+
+oarch_lifespan_by_cat %>% 
+  arrange(-avg_lifespan) %>% 
+  slice(1:10) %>% 
+  ggplot(aes(x = fct_reorder(category, avg_lifespan, .desc = TRUE),
+             y = avg_lifespan)) +
+  geom_col() +
+  labs(
+    title = "Project lifespan by category",
+    subtitle = "Top 10 longest-lived categories",
+    x = NULL, y = "Average lifespan (days)",
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+
+oarch_lifespan_by_cat %>% 
+  arrange(-avg_commit_rate) %>% 
+  slice(1:10) %>% 
+  ggplot(aes(x = fct_reorder(category, avg_commit_rate, .desc = TRUE),
+             y = avg_commit_rate)) +
+  geom_col() +
+  labs(
+    title = "Project activity by categories",
+    subtitle = "Top 10 most activity categories",
+    x = NULL, y = "Average activity (commits per day)",
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+```
+
 TODO: ZB: Any ideas for other relevant factors? Lots of ways you could go here...
 
 #### Growth
 
 ### Collaboration
 
-TODO: For this we need **covariaties**! Could be:
+TODO: For this we need **covariates**! Could be:
 
 * Domain (tags and categories)
 * Time
