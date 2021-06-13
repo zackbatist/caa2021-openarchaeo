@@ -352,7 +352,36 @@ oarch %>%
     legend.box.margin = margin()
   )
 ```
+
 ZB note / idea: Plot the dates of the first commits from each project to track the initiation of projects over time. Then a secondary analysis does the same thing but with a filter to limit the dataset to include only those projects with a certain minimum number of commits or issues (or whatever metric for activity we plan to use), or that have had activity during the past 3 months, i.e. what are the ages of projects that actually had active or ongoing development, or that are still active today? This might indicate the average lifespans of projects, or the properties of particularly active projects can be dissected to identify common practices that we can infer are the causes of their liveliness.
+
+```{r plot-lifespan}
+min_commits <- 5
+
+oarch %>% 
+  unnest(gh_commits) %>% 
+  drop_na(datetime) %>% 
+  group_by(item_name) %>%
+  add_tally() %>% 
+  filter(n >= min_commits) %>% 
+  mutate(first_commit = min(datetime),
+         mid_commit = median(datetime),
+         last_commit = max(datetime)) %>%
+  ggplot(aes(x = fct_reorder(item_name, mid_commit, .desc = TRUE),
+             y = datetime,
+             ymin = first_commit,
+             ymax = last_commit)) +
+  geom_linerange() +
+  geom_point(shape = "|") +
+  scale_y_datetime(date_breaks = "1 year") +
+  coord_flip() +
+  labs(
+    title = "Project lifespan",
+    subtitle = glue("Individual commits in GitHub repositories (with {min_commits} or more commits)"),
+    x = NULL, y = NULL,
+    caption = "Data: open-archaeo.info and GitHub API"
+  )
+```
 
 TODO: barcode plot (see above)
 
