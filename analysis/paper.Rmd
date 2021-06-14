@@ -25,6 +25,7 @@ library("tidyverse")
 library("lubridate")
 library("openarchaeoCollaboration")
 library("khroma")
+library("gt")
 ```
 
 ## Introduction
@@ -164,7 +165,7 @@ Two kinds of categories have been defined: software and documents. Software comp
 
 TODO [ZB]: Can you explain the logic behind the taxonomies, either here or in materials?
 
-#### Categories, tags, platforms and hosts
+#### Categories, tags, and platforms
 
 So let's start by breaking down the data set.
 
@@ -256,39 +257,13 @@ oarch %>%
   )
 ```
 
-The vast majority of projects included in open-archaeo are hosted on GitHub, but a few other hosts are used too. If we break this down by number of unique project maintainers, GitHub still remains dominant, but we see that each other platform is only used by a handful of individuals.
-
-```{r plot-repo-hosts}
-# TODO: add "none"
-# TODO: version with unique authors
-oarch %>% 
-  pivot_longer(c(github, gitlab, bitbucket, launchpad, codeberg),
-               names_to = "repo_host", values_to = "repo_url") %>% 
-  drop_na(repo_url) %>% 
-  count(repo_host) %>% 
-  arrange(-n) %>%
-  ggplot(aes(fct_reorder(repo_host, n, .desc = TRUE), n)) +
-  geom_col() +
-  labs(title = "Repository hosts",
-       caption = "Data: open-archaeo.info",
-       x = NULL, y = "Number of projects")
-```
-
-ZB: Plot host by number of unique users.
-
-How many are explicitly licensed? What are the most popular licenses?
-
-
 We also plotted the development of new software over time.
 
 ZB: Do a temporal analysis to get a sense of when platforms, tags and categories have been gaining popularity. There may not be a need for extreme detail here, but simply noting the dates of first commits might be helpful. I'm imagining a stacked bar chart, with each bar representing a month or a year, and with the stacked portions of each bar representing a platform or category.
 
-
-<<< cut? >>>
-
 #### Languages and platforms
 
-TODO: colour by platform
+TODO: Do we need to use this data, given it says much the same as the 'platform' taxonomy?
 
 The GitHub API provides data on the languages used in a repository based on an automated machine learning algorithm.
 Since most repositories use more than one language—if only one for the actual software, and another (e.g. HTML) for documentation—this data is presented as a table of languages and the number of bytes of code in that language detected in the repository.
@@ -326,11 +301,50 @@ oarch %>%
 
 Looking at number of bytes puts C++ and the web languages (HTML, PHP, and Javascript) on top, but this is probably affected by the relative verboseness of these languages and the popularity of web-based documentation across implementation languages. The number of repositories is probably more reliable and shows the popularity of scientific programming languages—R and Python—followed by web languages and then compiled C and C++.
 
-We also have a 'platform' taxonomy, which is a manually-classified description of the broad framework that the individual projects rely on.
+This largely confirms the pattern seen in our manual classification of the 'platform' of each project.
 
-<<< /cut? >>>
+#### Version control
 
+All projects included in open-archaeo make their source code available in some form, by definition.
+But not all make use of version control.
 
+```{r plot-repo-hosts}
+oarch <- mutate(oarch, none = ifelse(is.na(github) & 
+                                       is.na(gitlab) & 
+                                       is.na(bitbucket) & 
+                                       is.na(launchpad) & 
+                                       is.na(codeberg),
+                                     "", NA))
+
+oarch %>% 
+  pivot_longer(c(github, gitlab, bitbucket, launchpad, codeberg, none),
+               names_to = "repo_host", values_to = "repo_url") %>% 
+  drop_na(repo_url) %>% 
+  group_by(repo_host, author1_name) %>% 
+  summarise(n = n(), .groups = "drop_last") %>% 
+  mutate(total = sum(n)) %>% 
+  ungroup() %>% 
+  mutate(repo_host = fct_reorder(repo_host, total),
+         repo_host = fct_relevel(repo_host, "none")) %>% 
+  ggplot(aes(repo_host, n, group = author1_name)) +
+  geom_col(colour = "#333333") +
+  coord_flip() +
+  labs(title = "Most popular repository hosts",
+       subtitle = "By number of projects, grouped by first author",
+       caption = "Data: open-archaeo.info",
+       x = NULL, y = NULL)
+```
+
+Amongst those that do use version control, the vast majority are hosted on GitHub, but a few other hosts are used too. Codeberg is a distant second-place in terms of popularity, but this is largely driven by a single active author. 
+
+```{r table-no-repo}
+filter(oarch, none == "") %>% 
+  count(category)
+```
+
+About one in eight projects do not use one of these repository host.
+Some may use a different host, or not make their repositories publicly available, but it is probably safe to assume that the majority simply do not use version control.
+Many of these are standalone documents or code fragments (scripts) hosted, for example, as 'gists', but there are also some pieces of standalone software that apparently do not include version control.
 
 #### Repository activity
 
