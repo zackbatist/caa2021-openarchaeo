@@ -172,31 +172,34 @@ This plot indicates that most projects included in open-archaeo are designed to 
 
 ```{r plot-categories}
 oarch %>%
-  group_by(category) %>%
   drop_na(category) %>%
+  group_by(category) %>%
   summarise(n = n()) %>%
   ggplot(aes(fct_reorder(category, n), n)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Categories",
+    title = "Most popular categories",
+    subtitle = "By number of projects",
     caption = "Data: open-archaeo.info",
-    x = NULL, y = "Number of projects"
+    x = NULL, y = NULL
   )
 ```
 
 ```{r plot-platforms}
 oarch %>%
-  group_by(platform) %>%
   drop_na(platform) %>%
-  summarise(n = n()) %>%
-  ggplot(aes(fct_reorder(platform, n), n)) +
-  geom_col() +
+  group_by(platform, author1_name) %>%
+  summarise(n = n(), .groups = "drop_last") %>%
+  mutate(total = sum(n)) %>% 
+  ggplot(aes(fct_reorder(platform, total), n, group = author1_name)) +
+  geom_col(colour = "white") +
   coord_flip() +
   labs(
-    title = "Repository platforms",
+    title = "Most popular platforms",
+    subtitle = "By number of projects, grouped by primary author",
     caption = "Data: open-archaeo.info",
-    x = NULL, y = "Number of projects"
+    x = NULL, y = NULL
   )
 ```
 
@@ -205,8 +208,6 @@ Plugins for QGIS and mobile apps are also relatively popular.
 The remainder show a rather fragmented landscape of plugins for other desktop software (e.g. AutoCAD, ArcGIS); lesser used programming languages; and custom form and spreadsheet templates.
 
 When we break it down by number of unique contributors, we can account for the popularity of a platform in terms of share of the general population, regardless of how prolific their user-base is.
-
-ZB: Break down platform by contributors, since a few people may be prolific in their support of a platform without necessarily representing the whole population.
 
 If we compare categories with tags, we can see the general domains that each kind of resource is designed to serve.
 
