@@ -351,7 +351,7 @@ About one in eight projects do not use one of these repository host.
 Some may use a different host, or not make their repositories publicly available, but it is probably safe to assume that the majority simply do not use version control.
 Many of these are standalone documents or code fragments (scripts) hosted, for example, as 'gists', but there are also some pieces of standalone software that apparently do not include version control.
 
-#### Repository activity
+#### Repository lifespan and activity
 
 The next set of analyses relies on the GitHub API to assess the leverage data about the activity occurring within each repository. To simplify our analysis and maintain a consistent dataset for the subsequent set of analyses, we excluded data from other hosts such as Codeberg or BitBucket, which cumulativey amount to only n items (XX% of the total).
 
@@ -406,7 +406,7 @@ oarch %>%
   mutate(first_commit = min(datetime),
          mid_commit = median(datetime),
          last_commit = max(datetime)) %>%
-  ggplot(aes(x = fct_reorder(item_name, mid_commit, .desc = TRUE),
+  ggplot(aes(x = fct_reorder(item_name, last_commit, .desc = TRUE),
              y = datetime,
              ymin = first_commit,
              ymax = last_commit)) +
@@ -441,6 +441,8 @@ oarch %>%
 ```
 
 ```{r plot-lifespan-hist}
+# TODO: add more x breaks
+
 oarch_lifespan %>% 
   ggplot(aes(x = lifespan)) +
   geom_histogram() +
@@ -587,7 +589,8 @@ oarch %>%
   group_by(gh_repo) %>%
   summarise(n = n(), .groups = "drop") %>%
   ggplot(aes(x = n)) +
-  geom_histogram(binwidth = 1) +
+  geom_histogram() +
+  scale_x_log10() +
   labs(
     title = "Repository contributors",
     caption = "Data: <https://open-archaeo.info> and the GitHub API",
