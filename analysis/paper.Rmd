@@ -361,37 +361,30 @@ oarch %>%
   unnest(gh_commits) %>%
   drop_na(sha) %>%
   mutate(date = floor_date(datetime, "week")) %>%
-  mutate(rough_category = recode(
-    rough_category,
-    "Standalone apps" = "Standalone apps",
-    "Packages (R, Python, etc.)" = "Packages (R, Python, etc.)",
-    .default = "Other")) %>%
-  group_by(rough_category, date) %>%
+  mutate(lumped_category = recode(category,
+                                  "Specifications, protocols and schemas" = "Documents",
+                                  "Products" = "Documents",
+                                  "Guides" = "Documents",
+                                  "Lists and datasets" = "Documents",
+                                  .default = category)) %>% 
+  group_by(lumped_category, date) %>%
   summarise(n_commits = n(), .groups = "drop_last") %>%
   mutate(cat_total = sum(n_commits)) %>%
   mutate(cum_commits = cumsum(n_commits)) %>%
   ggplot(aes(date, cum_commits,
-             fill = fct_reorder(rough_category, cat_total),
-             colour = fct_reorder(rough_category, cat_total))) +
+             fill = fct_reorder(lumped_category, cat_total),
+             colour = fct_reorder(lumped_category, cat_total))) +
   geom_area() +
   scale_x_datetime(limits = c(ymd("2008-01-01", tz = "UTC"), NA),
                    date_breaks = "1 years",
                    date_labels = "%Y") +
-  scale_colour_contrast(guide = NULL) +
-  scale_fill_contrast(guide = guide_legend(reverse = TRUE)) +
+  scale_colour_bright(guide = NULL) +
+  scale_fill_bright(guide = guide_legend(reverse = TRUE)) +
   labs(
-    title = "Open Archaeology",
-    subtitle = "Cumulative commits in GitHub repositories",
+    title = "Growth of open archaeology",
+    subtitle = "Measured by cumulative commits in GitHub repositories",
     caption = "Data: <https://open-archaeo.info> and the GitHub API",
     x = NULL, y = NULL, fill = NULL
-  ) +
-  theme_minimal() +
-  theme(
-    text = element_text(family = "IBM Plex Sans"),
-    legend.position = "bottom",
-    legend.justification = "right",
-    legend.margin = margin(),
-    legend.box.margin = margin()
   )
 ```
 
