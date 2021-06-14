@@ -52,15 +52,21 @@ Research objectives and questions:
   * Collaboration over time: is the use of these features becoming more common?
 * Does collaboration in software development mirror, or differ from, collaborative practices in archaeological research more broadly?
 
-Over the past 10-15 years, archaeologists have embraced, at least in theory, the advent of open source software development. There has been a lot of optimism regarding the potential value that archaeological software development would bring (particularly in the 2012 special issue of World Archaeology), however depending on who you talk to, creative use of computers among archaeologists has either been a perpetual novelty or a normalized way of working.
+In applying either physical or digital methods, archaeology has a long tradition of adopting common or 'off the shelf' tools, and leveraging them in ways to serve our own unique needs that are typically unanticipated by their original designers.
 
-In this paper, we survey the field of archaeological software development in order to understand how archaeologists are _actually_ creating code. We rely rely on a data set called open-archaeo, which is a comprehensive list of software and resources developed by archaeologists for archaeological purposes. This is supplemented by data collected by GitHub, a collaborative open source software development platform that hosts the vast majority of projects listed in open-archaeo, and which automatically tracks users' contributions to various projects.
+A lot of this is surely due to resourcing and budgeting constraints, but holding prerequisite knowledge to create new tools, specifically designed for archaeology, may be a significant factor as well.
 
-The metrics we use reflect how work is distributed across time and delegated among members of a project and among the community as a whole. These data are analyzed to highlight how collaborative software development operates within our community.
+And while most archaeologists are probably content to outsource the metallurgical skills needed to forge their trowels, an increasingly large number of us are able to code our own programs and libraries, which serve functions that warrant archaeological input and initiative.
 
-This aspect of _collaborative_ software development is crucial to our interest in the historical development of software engineering among archaeologists. Archaeological software development is often (or nearly always) discussed as _open source_ software development. A technical definition of open source software is software whose source code is publicly accessible, and which is free to be used, modified or built upon by anyone and for any purpose. This implies, but does not necessarily require or benefit from, various collaborative endeavours. For instance, code written by a single person that is distributed under an open license, but which is never accessed or reused at any point after it is made available, meets this technical definition of open source, but misses out on the potential value that may be contributed by others. A revised definition of open source software defines it as software developed in a collaborative manner, as code that belongs to the community of developers, users and stakeholders who find value in the product and strive for its continued development and iterative improvement. We do not deny solitary software developers as members of a broader community; however their behaviour as solitary developers may imply the existence of widespread norms that encourage more basic, but perhaps less fulfilling, ways of working.
+In fact, archaeologists are prolific programmers, as this paper will demonstrate.
 
-In this sense, our study is about the development of norms and practices throughout the archaeological software development community. We have our own unique flavour, based on our distinct goals, constraints, mindsets and modes of organizing ourselves as archaeologists, which shape how we write code. Our goal in this paper is to highlight how our archaeological open source culture has emerged and continues to develop.
+Here, we present a survey of archaeological software development with a couple goals in mind.
+
+First, we want to see what kinds of software archaeologists are making, and for what general purposes.
+
+And second, we are interested in seeing how archaeologists collaborate in their programming work, and experience open source development processes, which have their own benefits, challenges and organizing principles that may conflict with or relate to means of collaboration and sharing that archaeologists are already generally accustomed to.
+
+In this sense, we want to see how archaeological software is benefitting from, or missing out on, the affordances that open source development models -- particularly, the value added by a broader community of invested stakeholders, the pragmatic implementation of iterative updates, and increased transparency -- and consider how our own unique software development culture emerged and continues to grow.
 
 
 ## Background
