@@ -169,8 +169,6 @@ Two kinds of categories have been defined: software and documents. Software comp
 
 ### Open archaeology
 
-TODO [ZB]: Can you explain the logic behind the taxonomies, either here or in materials?
-
 #### Categories, tags, and platforms
 
 So let's start by breaking down the data set.
@@ -344,6 +342,7 @@ oarch %>%
 Amongst those that do use version control, the vast majority are hosted on GitHub, but a few other hosts are used too. Codeberg is a distant second-place in terms of popularity, but this is largely driven by a single active author. 
 
 ```{r table-no-repo}
+# TODO: prettify with gt()
 filter(oarch, none == "") %>% 
   count(category)
 ```
