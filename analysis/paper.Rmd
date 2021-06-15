@@ -239,21 +239,71 @@ ZB: Compare tags with categories, to see the purposes of standalone software, da
 If we look at tags on their own, we can see which domains of archaeological research software is primarily being developed for. However, many items listed in open-archaeo have more than one tag. Based on an analysis of the co-occurence of tags, we infer that [...].
 
 ```{r plot-tags, fig.asp=2}
-# TODO: some merging of tags
+# Tags to be excluded as overly detailed/duplicating others
+detail_tags <- c("Instrumental Neutron activation analysis",
+                 "Harris Matrix",
+                 "aDNA Simulators",
+                 "Damage profilers",
+                 "Metagenomic classifers",
+                 "aDNA simulators",
+                 "aDNA damage-aware genotypers",
+                 "Low-coverage contamination estimation",
+                 "Low-coverage adapted population-genetics tools",
+                 "aDNA preprocessing",
+                 "aDNA aligner",
+                 "aDNA assembler",
+                 "aDNA toolkit")
+
 oarch %>%
   pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag",
                values_drop_na = TRUE) %>%
-  group_by(tag) %>%
   drop_na(tag) %>%
+  filter(!tag %in% detail_tags) %>% 
+  group_by(tag) %>% 
   summarise(n = n()) %>%
   ggplot(aes(fct_reorder(tag, n), n)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Tags",
+    title = "Most popular tags",
     caption = "Data: open-archaeo.info",
     x = NULL, y = "Number of projects"
   )
+```
+
+```{r plot-tags-cats}
+oarch %>%
+  pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag",
+               values_drop_na = TRUE) %>%
+  drop_na(tag) %>%
+  filter(!tag %in% detail_tags) %>% 
+  mutate(category = recode(category,
+                                  "Specifications etc." = "Documents",
+                                  "Products" = "Documents",
+                                  "Guides" = "Documents",
+                                  "Lists and datasets" = "Documents",
+                                  .default = category)) %>% 
+  group_by(tag, category) %>% 
+  summarise(n = n(), .groups = "drop_last") %>%
+  mutate(total = sum(n)) %>% 
+  ggplot(aes(fct_reorder(tag, total), n, fill = category)) +
+  # facet_wrap(vars(category)) +
+  geom_col() +
+  scale_fill_bright() +
+  coord_flip() +
+  labs(
+    title = "Tags by category",
+    caption = "Data: open-archaeo.info",
+    x = NULL, y = "Number of projects",
+    fill = NULL
+  ) +
+  theme_oarch() +
+  theme(
+    axis.text.y = element_text(size = 7)
+  )
+
+# Export for slides (full slide)
+# ggsave("figures/tags-cats.png", width = 254, height = 127, units = "mm")
 ```
 
 ```{r plot-tags-combo}
@@ -355,6 +405,9 @@ oarch %>%
        subtitle = "By number of projects, split by primary author",
        caption = "Data: open-archaeo.info",
        x = NULL, y = NULL)
+
+# Export for slides (half slide)
+# ggsave("figures/repo-hosts.png", width = 127, height = 127, units = "mm")
 ```
 
 Amongst those that do use version control, the vast majority are hosted on GitHub, but a few other hosts are used too. Codeberg is a distant second-place in terms of popularity, but this is largely driven by a single active author. 
@@ -479,7 +532,8 @@ oarch %>%
 
 oarch_lifespan %>% 
   ggplot(aes(x = lifespan)) +
-  geom_histogram() +
+  geom_histogram(binwidth = 100) +
+  scale_x_continuous(breaks = scales::breaks_width(1000)) +
   labs(
     title = "Project lifespan",
     subtitle = "Time between first and latest commit",
