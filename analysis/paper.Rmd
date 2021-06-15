@@ -28,6 +28,12 @@ library("khroma")
 library("gt")
 ```
 
+```{r plot-theme}
+theme_oarch <- function() theme(
+  text = element_text(family = "Lato")
+)
+```
+
 ## Introduction
 
 Research objectives and questions:
@@ -176,6 +182,10 @@ So let's start by breaking down the data set.
 This plot indicates that most projects included in open-archaeo are designed to be used as a package or library atop a platform. The designers of this code are basically creating missing functions within the base platform that are useful for archaeological purposes. Some are also creating software to be run independently of any platform. A significant amount of projects also comprise of datasets and non-packaged code snippets that have been made available for general use.
 
 ```{r plot-categories}
+oarch <- mutate(oarch, 
+                category = recode(category,
+                                  "Specifications, protocols and schemas" = "Specifications etc.",
+                                  .default = category))
 oarch %>%
   drop_na(category) %>%
   group_by(category) %>%
@@ -188,7 +198,11 @@ oarch %>%
     subtitle = "By number of projects",
     caption = "Data: open-archaeo.info",
     x = NULL, y = NULL
-  )
+  ) +
+  theme_oarch()
+
+# Export for slides (half slide)
+# ggsave("figures/categories.png", width = 127, height = 127, units = "mm")
 ```
 
 ```{r plot-platforms}
@@ -198,14 +212,18 @@ oarch %>%
   summarise(n = n(), .groups = "drop_last") %>%
   mutate(total = sum(n)) %>% 
   ggplot(aes(fct_reorder(platform, total), n, group = author1_name)) +
-  geom_col(colour = "white") +
+  geom_col(colour = "#333333") +
   coord_flip() +
   labs(
     title = "Most popular platforms",
-    subtitle = "By number of projects, grouped by primary author",
+    subtitle = "By number of projects, split by primary author",
     caption = "Data: open-archaeo.info",
     x = NULL, y = NULL
-  )
+  ) +
+  theme_oarch()
+
+# Export for slides (half slide)
+# ggsave("figures/platforms.png", width = 127, height = 127, units = "mm")
 ```
 
 R is overwhelmingly dominant as a platform, closely followed by Python.
@@ -334,7 +352,7 @@ oarch %>%
   geom_col(colour = "#333333") +
   coord_flip() +
   labs(title = "Most popular repository hosts",
-       subtitle = "By number of projects, grouped by first author",
+       subtitle = "By number of projects, split by primary author",
        caption = "Data: open-archaeo.info",
        x = NULL, y = NULL)
 ```
@@ -355,14 +373,13 @@ Many of these are standalone documents or code fragments (scripts) hosted, for e
 
 The next set of analyses relies on the GitHub API to assess the leverage data about the activity occurring within each repository. To simplify our analysis and maintain a consistent dataset for the subsequent set of analyses, we excluded data from other hosts such as Codeberg or BitBucket, which cumulativey amount to only n items (XX% of the total).
 
-
 ```{r plot-gh_commits-cum}
 oarch %>%
   unnest(gh_commits) %>%
   drop_na(sha) %>%
   mutate(date = floor_date(datetime, "week")) %>%
   mutate(lumped_category = recode(category,
-                                  "Specifications, protocols and schemas" = "Documents",
+                                  "Specifications etc." = "Documents",
                                   "Products" = "Documents",
                                   "Guides" = "Documents",
                                   "Lists and datasets" = "Documents",
@@ -375,17 +392,23 @@ oarch %>%
              fill = fct_reorder(lumped_category, cat_total),
              colour = fct_reorder(lumped_category, cat_total))) +
   geom_area() +
-  scale_x_datetime(limits = c(ymd("2008-01-01", tz = "UTC"), NA),
-                   date_breaks = "1 years",
+  scale_x_datetime(limits = c(ymd("2005-01-01", tz = "UTC"), 
+                              ymd("2021-05-31", tz = "UTC")),
+                   date_breaks = "2 years",
                    date_labels = "%Y") +
+  scale_y_continuous(labels = scales::comma) +
   scale_colour_bright(guide = NULL) +
   scale_fill_bright(guide = guide_legend(reverse = TRUE)) +
   labs(
     title = "Growth of open archaeology",
     subtitle = "Measured by cumulative commits in GitHub repositories",
-    caption = "Data: <https://open-archaeo.info> and the GitHub API",
+    caption = "Data: open-archaeo.info and GitHub API",
     x = NULL, y = NULL, fill = NULL
-  )
+  ) +
+  theme_oarch()
+
+# Export for slides (full slide)
+# ggsave("figures/commits-cum.png", width = 254, height = 127, units = "mm")
 ```
 
 Use of GitHub has been growing consistently since around 2014, but how is this activity distributed across repositories?
@@ -395,31 +418,42 @@ We found that the mean/median/mode lifespan of a project is XX months. Projects 
 ZB: Add columns to the right of the project lifespan plot with values showing commits per day, number of unique contributors, number of days between first and last commit, and any other relevant variables. Then discuss relationships between these variables.
 
 ```{r plot-lifespan}
-min_commits <- 5
-
 oarch %>% 
   unnest(gh_commits) %>% 
   drop_na(datetime) %>% 
   group_by(item_name) %>%
   add_tally() %>% 
-  filter(n >= min_commits) %>% 
+  filter(n > 1) %>% 
   mutate(first_commit = min(datetime),
          mid_commit = median(datetime),
          last_commit = max(datetime)) %>%
-  ggplot(aes(x = fct_reorder(item_name, last_commit, .desc = TRUE),
+  ggplot(aes(x = fct_reorder(item_name, last_commit, .desc = FALSE),
              y = datetime,
              ymin = first_commit,
              ymax = last_commit)) +
-  geom_linerange() +
-  geom_point(shape = "|") +
-  scale_y_datetime(date_breaks = "1 year") +
-  coord_flip() +
+  geom_linerange(size = 0.05) +
+  geom_point(size = 0.1) +
+  scale_y_datetime(limits = c(ymd("2005-01-01", tz = "UTC"), 
+                              ymd("2021-05-31", tz = "UTC")),
+                   date_breaks = "2 years", date_labels = "%Y") +
+  # coord_flip() +
   labs(
     title = "Project lifespan",
-    subtitle = glue("Individual commits in GitHub repositories (with {min_commits} or more commits)"),
+    subtitle = glue("Individual commits in GitHub repositories (with more than 1 commit)"),
     x = NULL, y = NULL,
     caption = "Data: open-archaeo.info and GitHub API"
+  ) +
+  theme_oarch() +
+  theme(
+    axis.line.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_blank()
   )
+
+# Export for slides (full slide)
+# ggsave("figures/lifespan.png", width = 254, height = 127, units = "mm")
 ```
 
 So we can see the "lifespan" and activity varies across repositories.
@@ -596,6 +630,8 @@ oarch %>%
     caption = "Data: <https://open-archaeo.info> and the GitHub API",
     x = "Number of contributors", y = "Number of repositories"
   )
+
+
 ```
 
 ZB: Add a chart, limited to repos with more than 1 contributor. It should present how evenly distributed commits are across all contributors. So maybe a percent stacked bar chart, with bars representing a repository, with each bar broken down into sections representing each inidividual contributor, and each section's size representing the percentage of the individual's commits out of the total from the repo.
