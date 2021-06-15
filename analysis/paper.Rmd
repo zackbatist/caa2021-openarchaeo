@@ -715,14 +715,41 @@ oarch %>%
   scale_x_log10() +
   labs(
     title = "Repository contributors",
-    caption = "Data: <https://open-archaeo.info> and the GitHub API",
-    x = "Number of contributors", y = "Number of repositories"
-  )
+    x = "Number of contributors", y = "Repositories",
+    caption = "Data: open-archaeo.info and GitHub API"
+  ) +
+  theme_oarch()
 
-
+# Export for slides (half slide)
+# ggsave("figures/contrib-hist.png", width = 127, height = 127, units = "mm")
 ```
 
-ZB: Add a chart, limited to repos with more than 1 contributor. It should present how evenly distributed commits are across all contributors. So maybe a percent stacked bar chart, with bars representing a repository, with each bar broken down into sections representing each inidividual contributor, and each section's size representing the percentage of the individual's commits out of the total from the repo.
+```{r plot-contrib-dist}
+oarch %>% 
+  unnest(gh_contribs) %>% 
+  drop_na(contributor) %>% 
+  group_by(item_name) %>% 
+  mutate(n_contributors = n()) %>% 
+  filter(n_contributors > 1) %>% 
+  mutate(big_boy = ifelse(contributions == max(contributions), 
+                          "Main contributor", "Other contributors")) %>% 
+  ggplot(aes(x = item_name, y = contributions, 
+             group = contributor,
+             fill = big_boy)) +
+  geom_col(position = "fill", colour = "white") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Repository", y = "Contributions",
+       fill = NULL) +
+  coord_flip() +
+  theme_oarch() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+# Export for slides (half slide)
+# ggsave("figures/contrib-dist.png", width = 127, height = 127, units = "mm")
+```
 
 #### Forks and pull requests
 
