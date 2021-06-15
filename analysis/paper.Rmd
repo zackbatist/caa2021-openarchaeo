@@ -517,7 +517,10 @@ oarch %>%
   unnest(gh_commits) %>% 
   drop_na(datetime) %>% 
   group_by(item_name) %>%
+  mutate(n_contribs = map_int(gh_contribs, vctrs::vec_size)) %>% 
   summarise(
+    category = first(category),
+    n_contribs = first(n_contribs),
     n = n(),
     first_commit = min(datetime),
     last_commit = max(datetime),
@@ -528,16 +531,34 @@ oarch %>%
 ```
 
 ```{r plot-lifespan-hist}
-# TODO: add more x breaks
-
 oarch_lifespan %>% 
   ggplot(aes(x = lifespan)) +
   geom_histogram(binwidth = 100) +
   scale_x_continuous(breaks = scales::breaks_width(1000)) +
   labs(
     title = "Project lifespan",
-    subtitle = "Time between first and latest commit",
-    x = "Days", y = "Repositories",
+    subtitle = "Time between first and latest commit, by repository",
+    x = "Days", y = NULL,
+    caption = "Data: open-archaeo.info and GitHub API"
+  ) +
+  theme_oarch()
+
+# Export for slides (half slide)
+# ggsave("figures/lifespan-hist.png", width = 127, height = 127, units = "mm")
+```
+
+```{r plot-lifespan-hist-byyear}
+oarch_lifespan %>% 
+  mutate(first_commit = year(first_commit)) %>% 
+  filter(first_commit %in% 2012:2020) %>% 
+  ggplot(aes(x = lifespan)) +
+  facet_wrap(vars(first_commit), nrow = 1) +
+  geom_histogram(binwidth = 100) +
+  scale_x_continuous(breaks = scales::breaks_width(1000)) +
+  labs(
+    title = NULL,
+    subtitle = NULL,
+    x = NULL, y = NULL,
     caption = "Data: open-archaeo.info and GitHub API"
   )
 ```
@@ -565,24 +586,37 @@ But when we break it down by number of contributors [...]
 ```{r plot-lifespan-vs-rate}
 oarch_lifespan %>% 
   ggplot(aes(x = lifespan, y = commit_rate, size = n)) +
-  geom_point() +
+  geom_point(shape = 21, fill = NA) +
   scale_x_log10() +
   scale_y_log10() +
   labs(
     title = "Project lifespan vs. average commit rate",
     x = "Lifespan (days)", y = "Commits per day", size = "Total commits",
+    caption = NULL
+  ) +
+  theme_oarch()
+# Export for slides (half slide)
+# ggsave("figures/lifespan-vs-rate-total.png", width = 127, height = 60, units = "mm")
+
+oarch_lifespan %>% 
+  ggplot(aes(x = lifespan, y = commit_rate, size = n_contribs)) +
+  geom_point(shape = 21, fill = NA) +
+  scale_x_log10() +
+  scale_y_log10() +
+  labs(
+    title = NULL,
+    x = "Lifespan (days)", y = "Commits per day", size = "Contributors",
     caption = "Data: open-archaeo.info and GitHub API"
-  )
+  ) +
+  theme_oarch()
+# Export for slides (half slide)
+# ggsave("figures/lifespan-vs-rate-contrib.png", width = 127, height = 60, units = "mm")
+
 ```
 
 The measures of activity may also be compared with the tags.
 
-ZB: Lifespan by tag is dominated by ancient DNA tags. Another hint that it may be best to lump all of those. In general though, I'm not sure how helpful the following tables are, unless we account for volume somehow.
-
-
 ```{r plot-lifespan-activity-tags}
-#TODO: think we might need some exclusion rules here 
-
 left_join(oarch_lifespan, oarch, by = c("item_name")) %>% 
   pivot_longer(c(tag1, tag2, tag3, tag4, tag5), values_to = "tag",
                values_drop_na = TRUE) %>%
