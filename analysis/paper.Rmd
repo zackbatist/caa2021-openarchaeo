@@ -755,19 +755,44 @@ oarch %>%
 
 #### Issues and comments
 
-```{r plot-gh_issues-histogram}
+```{r plot-issues-hist}
 oarch %>%
   unnest(gh_issues) %>%
   drop_na(title) %>%
   group_by(repo) %>%
   summarise(n = n(), .groups = "drop") %>%
   ggplot(aes(x = n)) +
-  geom_histogram(binwidth = 1) +
+  geom_histogram() +
+  scale_x_log10() +
   labs(
-    title = "Repository issues",
-    caption = "Data: <https://open-archaeo.info> and the GitHub API",
-    x = "Number of issues", y = "Number of repositories"
-  )
+    title = "Use of issues",
+    caption = "Data: open-archaeo.info and GitHub API",
+    x = "Number of issues", y = "Repositories"
+  ) +
+  theme_oarch()
+
+# Export for slides (half slide)
+# ggsave("figures/issues-hist.png", width = 127, height = 127, units = "mm")
+```
+
+```{r plot-comments-hist}
+oarch %>%
+  unnest(gh_comments) %>%
+  drop_na(issue_num) %>%
+  group_by(repo) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  ggplot(aes(x = n)) +
+  geom_histogram() +
+  scale_x_log10() +
+  labs(
+    title = "Use of comments",
+    caption = "Data: open-archaeo.info and GitHub API",
+    x = "Number of comments", y = "Repositories"
+  ) +
+  theme_oarch()
+
+# Export for slides (half slide)
+# ggsave("figures/comments-hist.png", width = 127, height = 127, units = "mm")
 ```
 
 ZB: How could we compare number of commits with number of issues? Some sort of coefficient, like commits divided by issues? Would this even be valuable at all?
