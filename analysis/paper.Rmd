@@ -732,14 +732,20 @@ oarch %>%
   mutate(n_contributors = n()) %>% 
   filter(n_contributors > 1) %>% 
   mutate(big_boy = ifelse(contributions == max(contributions), 
-                          "Main contributor", "Other contributors")) %>% 
-  ggplot(aes(x = item_name, y = contributions, 
-             group = contributor,
-             fill = big_boy)) +
-  geom_col(position = "fill", colour = "white") +
+                          "Main contributor", "Other contributors"),
+         big_boy_pct = max(contributions) / sum(contributions)) ->x %>% 
+  ggplot(aes(x = fct_reorder(item_name, big_boy_pct, .desc = FALSE),
+             y = contributions, 
+             # group = contributor,
+             fill = fct_relevel(big_boy, c("Other contributors",
+                                           "Main contributor")))) +
+  geom_col(position = "fill", colour = "white", size = 0.1) +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "Repository", y = "Contributions",
-       fill = NULL) +
+  scale_fill_contrast(guide = guide_legend(reverse = TRUE)) +
+  labs(title = "Repository contributors by proportion of contributions",
+       x = NULL, y = "Contributions",
+       fill = NULL,
+       caption = "Data: open-archaeo.info and GitHub API") +
   coord_flip() +
   theme_oarch() +
   theme(
