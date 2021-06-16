@@ -26,6 +26,6 @@ usethis::create_github_token()
 
 ## Citation
 
-Please cite the [preliminary results presented at CAA](/zackbatist/caa2021-openarchaeo/releases/tag/v0.1) as:
+Please cite the [preliminary results presented at CAA](https://github.com/zackbatist/caa2021-openarchaeo/releases/tag/v0.1) as:
 
 * Batist, Zack and Joe Roe. 2021. *Open archaeology: a survey of collaborative software engineering in archaeological research*. Presented at Computer Applications & Quantitative Methods in Archaeology, Limassol (Virtual), 14–18 June 2021.
