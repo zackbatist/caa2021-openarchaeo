@@ -3,13 +3,13 @@ Type: Package
 Title: Data and Code for an Analysis of Open-Archaeo
 Version: 0.1.0
 Authors@R: 
-  c(person(given = "Batist",
-           family = "Zack",
+  c(person(family = "Batist",
+           given = "Zack",
            role = c("aut", "cre"),
            email = "z.batist@mail.utoronto.ca",
            comment = c(ORCID = "0000-0003-0435-508X")),
-    person(given = "Roe",
-           family = "Joe",
+    person(family = "Roe",
+           given = "Joe",
            role = "aut",
            email = "joe@joeroe.io",
            comment = c(ORCID = "0000-0002-1011-1244")))
